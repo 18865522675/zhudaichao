@@ -1,0 +1,58 @@
+.headerTitle{
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+  padding-bottom: 20px;
+  font-weight: bold;
+  font-size: 14px;
+}
+.otherConfig{
+  .global-childItem{
+    &>span:not(.smallSpan){
+      text-align: center;
+    }
+    span+*{
+      flex: 1!important;
+    }
+  }
+}
+.affilateWrap{
+  .dialogTitle{
+    font-weight: bold;
+    display: block;
+    padding-bottom: 10px;
+  }
+  .flexChild{
+    width: 25%;
+    font-size: 13px;
+    color:gray;
+    line-height: 25px;
+  }
+  .recordList{
+    max-height: 400px;
+    overflow-y: auto;
+    .recordItem{
+      box-sizing: border-box;
+      padding: 20px;
+      border-radius: 5px;
+      border: 1px solid gray;
+      &:not(:first-child){
+        margin-top: 15px;
+      }
+    }
+  }
+
+  .recordInp{
+    width: 90%;
+    margin-left: 20px
+  }
+}
+.totalInfo{
+  font-weight: bold;
+  font-size: 14px;
+}
+.refuseItem{
+  padding: 5px 15px;
+  border:1px solid gray;
+  border-radius: 15px;
+  font-size: 12px;
+
+}
