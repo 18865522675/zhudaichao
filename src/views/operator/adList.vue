@@ -84,7 +84,7 @@
             <el-dialog
                     :title="actionType?'新增':'编辑'"
                     :visible.sync="dialogVisible"
-                    width="30%"
+                    width="800px"
                     @close="handleClose">
                 <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
                 	<el-form-item label="广告图片 :">
@@ -224,12 +224,11 @@
     		this.dialogVisible=true
     	},
     	fnUploadRequest(option){
-    		console.log(option)
-    		    this.client.put('banner', option.file).then((val) => {
+    		    this.client.multipartUpload('banner'+option.filename,option.file).then((val) => {
 		         	console.log(val)
 		        }, err => {
+		        	console.log(err)
 		        })
-			console.log(option.file)
     	},
       changeInp(val){
         console.log(val)

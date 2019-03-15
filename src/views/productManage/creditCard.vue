@@ -99,7 +99,7 @@
 
 
 
-                <div class="listContent marT60">
+                <div class="listContent">
                     <!--<div class="flex-r" style="justify-content: flex-end">
                         <div class="flex-r" style="align-items: center">
                             <div>
@@ -114,7 +114,7 @@
                         </div>
                     </div>-->
                     <el-row type="flex" class="row-bg" style="flex-wrap: wrap;justify-content: flex-end;margin-right: 0px;" :gutter="50">
-                   		 <el-button  icon="el-icon-plus"  class="plusBtn" @click="dialogVisible=true">新增产品</el-button>
+                   		 <el-button  icon="el-icon-plus"  class="plusBtn" @click="showAdd(true)">新增产品</el-button>
                     <!--19BE6B-->
                     </el-row>
                     <el-table
@@ -131,7 +131,7 @@
                         </el-table-column>
                         <el-table-column
                                 prop="logo"
-                                label="产品图片">
+                                label="信用卡图片">
                         </el-table-column>
                         <el-table-column
                                 prop="weight"
@@ -157,12 +157,12 @@
                                 fixed="right"
                                 label="操作" width="230">
                             <template slot-scope="scope">
-                                <el-button size="mini" plain class="aplus-pribtn" @click="delChannel(scope.row)" >编辑</el-button>
-                                <el-button size="mini" plain class="aplus-errorBtn" @click="downProduct(scope.row)" >下架</el-button>
+                                <el-button size="mini" plain class="aplus-pribtn"  @click="showAdd(false,scope.row)" >编辑</el-button>
+                                <el-button size="mini" plain class="aplus-errorBtn" @click="delCredit(scope.row)" >删除</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
-                    <div class="block pagiWrap" style="margin-top: 20px">
+                    <!--<div class="block pagiWrap" style="margin-top: 20px">
                         <el-pagination
                                 @size-change="handleSizeChange"
                                 @current-change="handleCurrentChange"
@@ -172,9 +172,95 @@
                                 layout="total, sizes, prev, pager, next, jumper"
                                 :total="total">
                         </el-pagination>
-                    </div>
+                    </div>-->
                 </div>
             </div>
+
+
+			<el-dialog
+			  :title="actionType?'新增':'编辑'"
+			  :visible.sync="dialogVisible"
+			  width="950px"
+			  :before-close="handleClose">
+			  <div>
+			  	 <h3>产品信息</h3>
+			  	 <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+                	<el-form-item label="信用卡图片 :">
+                       <el-upload
+						  class="avatar-uploader"
+						 :http-request="fnUploadRequest"
+						  :show-file-list="false"
+						  action=""
+						  :with-credentials="true"
+						  :on-success="handleAvatarSuccess"
+						  :before-upload="beforeAvatarUpload">
+						  <img v-if="imageUrl" :src="imageUrl" class="avatar">
+						  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+						</el-upload>
+                    </el-form-item>
+                    <div class="formItemLine">
+                    	<el-form-item label="信用卡名称 :" >
+	                        <el-input v-model.trim="ruleForm.name"   auto-complete="new-password"  placeholder="请输入信用卡名称"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="申请人数 :">
+	                        <el-input v-model.trim="ruleForm.applyNum"   auto-complete="new-password"  placeholder="请输入申请人数"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="权重 :" >
+	                    	<el-input v-model.trim="ruleForm.weight"   auto-complete="new-password" 	 placeholder="请输入权重"></el-input>
+	                    </el-form-item>
+                    </div>
+                    <div class="formItemLine">
+                    	<el-form-item label="产品主题 :">
+	                       <el-select style="width: 100%" v-model="ruleForm.theme" multiply placeholder="请选择产品主题">
+                                    <el-option  label="新手上路" value="新手上路"></el-option>
+                                    <el-option  label="核批率高" value="核批率高"></el-option>
+                                    <el-option  label="高额提取" value="高额提取"></el-option>
+                                    <el-option  label="速下卡" value="速下卡"></el-option>
+                             </el-select>
+	                    </el-form-item>
+	                    <el-form-item label="产品链接 :">
+	                        <el-input v-model.trim="ruleForm.productLink"   auto-complete="new-password"  placeholder="请输入产品链接"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="所属板块 :" prop="plateId">
+	                    	 <el-select style="width: 100%" v-model="ruleForm.plateId" multiply placeholder="请选择产品主题">
+                                    <el-option v-for="(item,index) in plateList" :key="index"  :label="item.plateName" :value="item.id"></el-option>
+                             </el-select>
+	                    </el-form-item>
+                    </div>
+                    
+                    <div class="formItemLine">
+                    	<el-form-item label="所属银行 :">
+	                        <el-input v-model.trim="ruleForm.bank"   auto-complete="new-password"  placeholder="请输入所属银行"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="年费 :">
+	                    	<el-select style="width: 100%" v-model="ruleForm.annualFee" multiply placeholder="请选择年费">
+                                    <el-option  label="有限期免年费" value="有限期免年费"></el-option>
+                                    <el-option  label="交易免年费" value="交易免年费"></el-option>
+                                    <el-option  label="积分免年费" value="积分免年费"></el-option>
+                                    <el-option  label="刚性年费" value="刚性年费"></el-option>
+                             </el-select>
+	                    </el-form-item>
+	                    <el-form-item label="币种 :">
+	                    	 <el-select style="width: 100%" v-model="ruleForm.currency" multiply placeholder="请选择币种">
+                                    <el-option  label="人民币单币种" value="人民币单币种"></el-option>
+                                    <el-option  label="外币单币种" value="外币单币种"></el-option>
+                                    <el-option  label="双币种" value="双币种"></el-option>
+                                    <el-option  label="全币种" value="全币种"></el-option>
+                             </el-select>
+	                    </el-form-item>
+                    </div>
+                    <el-form-item label="产品简介 :" prop="productInfo">
+	                    <el-input v-model.trim="ruleForm.productInfo"   auto-complete="new-password" type="textarea" 	 placeholder="请输入产品简介"></el-input>
+	                </el-form-item>
+                   
+                </el-form>
+			  </div>
+			  <span slot="footer" class="dialog-footer">
+			    <el-button @click="dialogVisible = false">取 消</el-button>
+			    <el-button type="primary" @click="sureAdd">确 定</el-button>
+			  </span>
+			</el-dialog>
+
 
         </el-card>
 
@@ -188,6 +274,8 @@
     name: "channelList",
     data() {
       return {
+      	dialogVisible:false,
+      	actionType:true,
         tableForm:{
           time:"",
           time1:"",
@@ -231,6 +319,36 @@
             }
           }]
         },
+        ruleForm:{
+        	  "annualFee": "string",
+			  "applyNum": 0,
+			  "bank": "string",
+			  "currency": "string",
+			  "logo": "string",
+			  "name": "string",
+			  "plateId": 0,
+			  "productInfo": "string",
+			  "productLink": "string",
+			  "theme": "string",
+			  "weight": 0
+        },
+        rules: {
+          productName: [{
+            required: true,
+            message:"请输入产品名称",
+            trigger: 'blur'
+          }],
+          applyNum: [{
+            required: true,
+            message:"请输入申请人数",
+            trigger: 'blur'
+          }],
+          weight: [{
+            required: true,
+            message:"请输入权重",
+            trigger: 'blur'
+          }],   
+        },
       };
     },
     mounted() {
@@ -256,13 +374,40 @@
         }
       }
     },
-    methods: {
-      downProduct(row){
-      	this.$toolkit.showConfrim('确定要下架此产品吗？','提示').then(()=>{
-          this.$api.product.LoanUndercarriage({
-          	productId:row.id
+    methods:{
+      sureAdd(){
+      	if(this.actionType){
+      		this.$api.product.addCreditCard({
+      			...this.ruleForm
+      		}).then((res)=>{
+      			this.$message.success("新增成功!");
+      			this.dialogVisible=false;
+      			this.readyAjax()
+      		})
+      	}else{
+      		this.$api.product.editCreditCard({
+      			...this.ruleForm
+      		}).then((res)=>{
+      			this.$message.success("编辑成功!");
+      			this.dialogVisible=false;
+      			this.readyAjax()
+      		})
+      		
+      	}
+      },
+      showAdd(actionType,row){
+      	this.actionType=actionType;
+      	if(!actionType){
+      		this.ruleForm={...row}
+      	}
+      	this.dialogVisible=true
+      },
+      delCredit(row){
+      	this.$toolkit.showConfrim('确定要删除此产品吗？','提示').then(()=>{
+          this.$api.product.delCredit({
+          	id:row.id
           }).then(()=>{
-            this.$message.success("产品下架成功!");
+            this.$message.success("删除成功!");
             this.readyAjax()
           })
         })
@@ -289,14 +434,10 @@
         this.getOkOrdersList()
       },
       getOkOrdersList(){
-        this.$api.product.getLoanProduct_list({
-          ...this.tableForm,
-          pageNum:this.currentPage,
-          pageSize:this.pageSize
-        }).then((res)=>{
-          this.okOrderList=res.data.list;
-          this.condition=res.data.condition
-          this.total=res.data.total
+        this.$api.product.getCreditCard_list().then((res)=>{
+          this.okOrderList=res.data;
+//        this.condition=res.data.condition
+//        this.total=res.data.total
         })
       },
       getProductTypeList(){
@@ -305,10 +446,10 @@
       	})
       },
       getProductPlateList(){
-      	this.$api.channel.getProductPlateList().then((res)=>{
+      	this.$api.channel.getCreditPlateList().then((res)=>{
       		this.plateList=res.data;
       	})
-      }
+      },
 
     },
     created() {},
@@ -340,4 +481,33 @@
         /*font-size: 14px;*/
     /*}*/
 
+ .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+  .formItemLine{
+  	display: flex;
+  	.el-form-item{
+  		width: 33%;
+  	}
+  }
 </style>

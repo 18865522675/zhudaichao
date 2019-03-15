@@ -6,7 +6,20 @@ export default {
   
   
    LoanUndercarriage: params => $.put("/product/undercarriage", params, { lock: true }),
-
+   
+   getPlateList: params => $.put("/product/plate/list", params, { lock: true }),
+   
+   addLoanProduct: params => $.post("/product", params, { lock: true }),
+   
+   getCreditCard_list: params => $.post("/credit/card/getAllCard", params, { lock: true }),
+   
+   delCredit: params => $.post("/credit/card/delete", params, { lock: true }),
+   
+   
+   addCreditCard: params => $.post("/credit/card/submit", params, { lock: true }),
+   
+   editCreditCard: params => $.post("/credit/card/update", params, { lock: true }),
+   
 
   // 订单管理-当日应还款订单
   getTodayShouldPayList: params => $.get("/loanOrder/loanOrderHisList", params, { lock: true }),

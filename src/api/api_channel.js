@@ -39,10 +39,10 @@ export default {
   
   getProductTypeList: params => $.get("/product/category/list", params, { lock: true }),
   
-  getProductPlateList: params => $.get("/product/plate/list", params, { lock: true }),
+  getProductPlateList: params => $.get("/credit/card/getProductPlate", params, { lock: true }),
   
   
-  
+  getCreditPlateList: params => $.post("/credit/card/getProductPlate", params, { lock: true }),
   
   
 

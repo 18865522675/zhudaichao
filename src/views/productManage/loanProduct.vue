@@ -114,7 +114,7 @@
                         </div>
                     </div>-->
                     <el-row type="flex" class="row-bg" style="flex-wrap: wrap;justify-content: flex-end;margin-right: 0px;" :gutter="50">
-                   		 <el-button  icon="el-icon-plus"  class="plusBtn" @click="dialogVisible=true">新增产品</el-button>
+                   		 <el-button  icon="el-icon-plus"  class="plusBtn" @click="showAdd(true)">新增产品</el-button>
                     <!--19BE6B-->
                     </el-row>
                     <el-table
@@ -176,6 +176,105 @@
                 </div>
             </div>
 
+
+			<el-dialog
+			  :title="actionType?'新增':'编辑'"
+			  :visible.sync="dialogVisible"
+			  width="950px"
+			  :before-close="handleClose">
+			  <div>
+			  	 <h3>产品信息</h3>
+			  	 <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+                	<el-form-item label="产品图片 :">
+                       <el-upload
+						  class="avatar-uploader"
+						 :http-request="fnUploadRequest"
+						  :show-file-list="false"
+						  action=""
+						  :with-credentials="true"
+						  :on-success="handleAvatarSuccess"
+						  :before-upload="beforeAvatarUpload">
+						  <img v-if="imageUrl" :src="imageUrl" class="avatar">
+						  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+						</el-upload>
+                    </el-form-item>
+                    <div class="formItemLine">
+                    	<el-form-item label="产品名称 :" >
+	                        <el-input v-model.trim="ruleForm.product.productName"   auto-complete="new-password"  placeholder="请输入产品名称"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="申请人数 :">
+	                        <el-input v-model.trim="ruleForm.product.applyNum"   auto-complete="new-password"  placeholder="请输入申请人数"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="权重 :" >
+	                    	<el-input v-model.trim="ruleForm.product.weight"   auto-complete="new-password" 	 placeholder="请输入权重"></el-input>
+	                    </el-form-item>
+                    </div>
+                    <div class="formItemLine">
+                    	<el-form-item label="还款方式 :" prop="paymentType">
+	                        <el-input v-model.trim="ruleForm.product.paymentType"   auto-complete="new-password"  placeholder="请输入还款方式"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="产品链接 :" prop="productLink">
+	                        <el-input v-model.trim="ruleForm.product.productLink"   auto-complete="new-password"  placeholder="请输入产品链接"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="申请条件 :" prop="applyRequire">
+	                    	<el-input v-model.trim="ruleForm.product.applyRequire"   auto-complete="new-password" 	 placeholder="请输入申请条件"></el-input>
+	                    </el-form-item>
+                    </div>
+                    
+                    <div class="formItemLine">
+                    	<el-form-item label="所需资料 :" prop="requireInfo">
+	                        <el-input v-model.trim="ruleForm.product.requireInfo"   auto-complete="new-password"  placeholder="请输入所需资料"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="产品类别 :" prop="productCategoryId">
+	                        <el-input v-model.trim="ruleForm.product.productCategoryId"   auto-complete="new-password"  placeholder="请输入产品类别"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="所属板块 :" prop="plateId">
+	                    	 <el-select style="width: 100%" v-model="ruleForm.product.plateId" multiply placeholder="请选择所属板块">
+                                    <el-option v-for="(item,index) in plateList" :key="index" :label="item.plateName" :value="item.id"></el-option>
+                             </el-select>
+	                    </el-form-item>
+                    </div>
+                    <el-form-item label="产品简介 :" prop="productInfo">
+	                    <el-input v-model.trim="ruleForm.product.productInfo"   auto-complete="new-password" type="textarea" 	 placeholder="请输入产品简介"></el-input>
+	                </el-form-item>
+	                <el-form-item label="产品描述 :" prop="productDescribe">
+	                    <el-input v-model.trim="ruleForm.product.productDescribe"   auto-complete="new-password" type="textarea"  	 placeholder="请输入产品描述"></el-input>
+	                </el-form-item>
+                     <h3 class="marT30">借款信息</h3>
+                      <div class="formItemLine">
+                    	<el-form-item label="利率类型 :" prop="interestType">
+	                        <el-input v-model.trim="ruleForm.borrowInfo.interestType"   auto-complete="new-password"  placeholder="请输入所需资料"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="利率值 :" prop="interestValue">
+	                        <el-input v-model.trim="ruleForm.borrowInfo.interestValue"   auto-complete="new-password"  placeholder="请输入百分比"></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="放款速率">
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.lendingRateMin"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
+	                    	~
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.lendingRateMax"   auto-complete="new-password"  style="width: 92px;"	></el-input>
+	                    </el-form-item>
+                    </div>
+                    <div class="formItemLine">
+	                    <el-form-item label="贷款额度">
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanPeriodMin"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
+	                    	~
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanPeriodMax"   auto-complete="new-password"  style="width: 92px;"	></el-input>
+	                    </el-form-item>
+	                    <el-form-item label="贷款期限">
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanQuotaMin"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
+	                    	~
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanQuotaMax"   auto-complete="new-password"  style="width: 92px;"	></el-input>
+	                    </el-form-item>
+                    </div>
+                </el-form>
+			  </div>
+			  <span slot="footer" class="dialog-footer">
+			    <el-button @click="dialogVisible = false">取 消</el-button>
+			    <el-button type="primary" @click="sureAdd">确 定</el-button>
+			  </span>
+			</el-dialog>
+
+
         </el-card>
 
     </div>
@@ -188,6 +287,8 @@
     name: "channelList",
     data() {
       return {
+      	dialogVisible:false,
+      	actionType:true,
         tableForm:{
           time:"",
           time1:"",
@@ -231,6 +332,55 @@
             }
           }]
         },
+        ruleForm:{
+        	product:{
+        		"applyNum": "",
+			    "applyRequire": "",
+			    "categoryName": "",
+			    "logo": "",
+			    "paymentType": "",
+			    "plateId": "",
+			    "plateName": "",
+			    "productCategoryId": "",
+			    "productDescribe": "",
+			    "productInfo": "",
+			    "productLink": "",
+			    "productName": "",
+			    "requireInfo": "",
+			    "status": "",
+			    "type": "",
+			    "weight": "",
+			    "productId":0
+        	},
+        	borrowInfo:{
+				    "interestType": "string",
+				    "interestValue": "",
+				    "lendingRateMax": "",
+				    "lendingRateMin": "",
+				    "loanPeriodMax": "",
+				    "loanPeriodMin": "",
+				    "loanQuotaMax": "",
+				    "loanQuotaMin": "",
+				    "productId": 0
+        	}
+        },
+        rules: {
+          productName: [{
+            required: true,
+            message:"请输入产品名称",
+            trigger: 'blur'
+          }],
+          applyNum: [{
+            required: true,
+            message:"请输入申请人数",
+            trigger: 'blur'
+          }],
+          weight: [{
+            required: true,
+            message:"请输入权重",
+            trigger: 'blur'
+          }],   
+        },
       };
     },
     mounted() {
@@ -256,7 +406,23 @@
         }
       }
     },
-    methods: {
+    methods:{
+      sureAdd(){
+      	if(this.actionType){
+      		this.$api.product.addLoanProduct({
+      			productAddPO:this.ruleForm
+      		}).then((res)=>{
+      			
+      		})
+      	}
+      },
+      showAdd(actionType,row){
+      	this.actionType=actionType;
+      	if(!actionType){
+//    		this
+      	}
+      	this.dialogVisible=true
+      },
       downProduct(row){
       	this.$toolkit.showConfrim('确定要下架此产品吗？','提示').then(()=>{
           this.$api.product.LoanUndercarriage({
@@ -308,7 +474,7 @@
       	this.$api.channel.getProductPlateList().then((res)=>{
       		this.plateList=res.data;
       	})
-      }
+      },
 
     },
     created() {},
@@ -340,4 +506,33 @@
         /*font-size: 14px;*/
     /*}*/
 
+ .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+  .formItemLine{
+  	display: flex;
+  	.el-form-item{
+  		width: 33%;
+  	}
+  }
 </style>
