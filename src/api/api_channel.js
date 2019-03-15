@@ -28,7 +28,13 @@ export default {
   
   delAd: params => $.post("/banner/delete", params, { lock: true }),
   
-  getAdList: params => $.post("/banner/getByType", params, { lock: true }),
+  getAdList: params => $.get("/banner/list", params, { lock: true }),
+  
+  addAd: params => $.post("/banner/submit", params, { lock: true }),
+  
+  editAd: params => $.post("/banner/update", params, { lock: true }),
+  
+  delAd: params => $.post("/banner/delete?id="+params, {}, { lock: true }),
   
   
   getProductTypeList: params => $.get("/product/category/list", params, { lock: true }),

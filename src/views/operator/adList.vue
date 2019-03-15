@@ -16,7 +16,7 @@
 
             <div class="cardBody">
                 <el-row type="flex" class="row-bg" style="flex-wrap: wrap" :gutter="50">
-                    <el-button  icon="el-icon-plus" style="margin-left: 25px;" class="plusBtn" @click="dialogVisible=true">新增广告位</el-button>
+                    <el-button  icon="el-icon-plus" style="margin-left: 25px;" class="plusBtn" @click="showAdd(true)">新增广告位</el-button>
                     <!--19BE6B-->
                 </el-row>
 
@@ -30,34 +30,37 @@
                             tooltip-effect="dark"
                             style="width: 100%">
                         <el-table-column
-                                prop="id"
+                                prop="bannerName"
                                 label="广告名称">
                         </el-table-column>
                         <el-table-column
-                                prop="name"
+                                prop="imageUrl"
                                 label="广告图片">
                         </el-table-column>
                         <el-table-column
                                 prop="loginName"
                                 label="是否跳转"
                                 show-overflow-tooltip >
+                         <template slot-scope="scope">
+                         	{{scope.row.linkUrl?'是':'否'}}
+                         </template>
                         </el-table-column>
-                        <el-table-column
+                        <!--<el-table-column
                                 prop="linkUrl"
                                 label="广告位置"
                                 show-overflow-tooltip >
-                        </el-table-column>
-                        <el-table-column
-                                prop="linkUrl"
+                        </el-table-column>-->
+                        <!--<el-table-column
+                                prop="remark"
                                 label="备注"
                                 show-overflow-tooltip >
-                        </el-table-column>
+                        </el-table-column>-->
                         <el-table-column
                                 prop="payMoney"
                                 label="操作"
                                 show-overflow-tooltip>
                             <template slot-scope="scope">
-                                <el-button size="mini" plain class="aplus-pribtn" @click="delChannel(scope.row)" >编辑</el-button>
+                                <el-button size="mini" plain class="aplus-pribtn" @click="showAdd(false,scope.row)" >编辑</el-button>
                                 <el-button size="mini" plain class="aplus-errorBtn" @click="delAd(scope.row)" >删除</el-button>
                             </template>
                         </el-table-column>
@@ -79,7 +82,7 @@
 
 
             <el-dialog
-                    title="新增"
+                    :title="actionType?'新增':'编辑'"
                     :visible.sync="dialogVisible"
                     width="30%"
                     @close="handleClose">
@@ -87,37 +90,39 @@
                 	<el-form-item label="广告图片 :">
                        <el-upload
 						  class="avatar-uploader"
-						  action="https://jsonplaceholder.typicode.com/posts/"
+						 :http-request="fnUploadRequest"
 						  :show-file-list="false"
+						  action=""
+						  :with-credentials="true"
 						  :on-success="handleAvatarSuccess"
 						  :before-upload="beforeAvatarUpload">
 						  <img v-if="imageUrl" :src="imageUrl" class="avatar">
 						  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
 						</el-upload>
                     </el-form-item>
-                    <el-form-item label="是否跳转 :" prop="loginName">
+                    <!--<el-form-item label="是否跳转 :" prop="loginName">
                         <el-input v-model.trim="ruleForm.loginName"    auto-complete="new-password"  placeholder="请输入账号(由数字和字母组成)"></el-input>
+                    </el-form-item>-->
+                    <el-form-item label="广告名称 :" prop="bannerName">
+                    <el-input v-model.trim="ruleForm.bannerName"   auto-complete="new-password"  placeholder="请输入广告名称"></el-input>
                     </el-form-item>
-                    <el-form-item label="跳转链接 :" prop="password">
-                    <el-input v-model.trim="ruleForm.password"   auto-complete="new-password"  type="password" placeholder="请输入密码"></el-input>
+                    <el-form-item label="跳转链接 :" prop="linkUrl">
+                    <el-input v-model.trim="ruleForm.linkUrl"   auto-complete="new-password"  placeholder="请输入跳转链接"></el-input>
                     </el-form-item>
-                    <el-form-item label="广告类型 :" prop="password">
-                    	<el-select style="width: 100%" v-model="ruleForm.value" placeholder="请选择规则设置">
-                            <el-option label="命中直接拒绝客户" :value="0"></el-option>
-                            <el-option label="命中不直接拒绝客户" :value="1"></el-option>
-                        </el-select>
+                    <el-form-item label="广告类型 :" prop="type">
+                    	        <el-input v-model.trim="ruleForm.type"   auto-complete="new-password" 	 placeholder="请输入广告类型"></el-input>
                     </el-form-item>
-                    <el-form-item label="是否启用 :" prop="password">
-                    	  <el-radio v-model="ruleForm.isOpen" label="1">是</el-radio>
-  						  <el-radio v-model="ruleForm.isOpen" label="2">否</el-radio>
+                    <el-form-item label="是否上架 :" prop="status">
+                    	  <el-radio v-model="ruleForm.status" :label="1">是</el-radio>
+  						  <el-radio v-model="ruleForm.status" :label="0">否</el-radio>
                     </el-form-item>
-                    <el-form-item label="备注 :" prop="password">
-                    <el-input v-model.trim="ruleForm.password"   auto-complete="new-password"  type="textarea" placeholder="请输入密码"></el-input>
+                    <el-form-item label="备注 :" prop="title">
+                    <el-input v-model.trim="ruleForm.title"   auto-complete="new-password"  type="textarea" placeholder="请输入备注 "></el-input>
                     </el-form-item>
                 </el-form>
                 <span slot="footer" class="dialog-footer">
                 <el-button @click="dialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="getChannel('ruleForm')">确 定</el-button>
+                <el-button type="primary" @click="addAd('ruleForm')">确 定</el-button>
               </span>
             </el-dialog>
 
@@ -128,9 +133,9 @@
 
     </div>
 </template>
-
 <script>
-  import animate from "animate.css";
+
+  import OSS from "ali-oss"
   import { mapState } from 'vuex';
   export default {
     name: "channelList",
@@ -150,30 +155,52 @@
       return {
         tableForm:{
           time:"",
+          imageUrl:"",
+          title:"",
+          type:"",
+          status:1	,
+          bannerName:""
         },
         dialogVisible:false,
-        ruleForm:{},
+        ruleForm:{
+        	status:1
+        },
         currentPage:1,
         pageSize:10,
         loginName:"",
         tableData:[],
         rules: {
-          loginName: [{
+          linkUrl: [{
             required: true,
-            validator: validateLoginName,
+            message:"请输入跳转链接",
             trigger: 'blur'
           }],
-          password: [{
+          type: [{
             required: true,
-            message:"请输入密码",
+            message:"请输入广告类型",
             trigger: 'blur'
           }],
+          bannerName: [{
+            required: true,
+            message:"请输入广告名称",
+            trigger: 'blur'
+          }],
+          
+         
         },
-        total:0
+        total:0,
+        client:null,
+        actionType:true
       }
     },
     mounted() {
-        this.getChannelList()
+    	 this.client = new OSS({
+          region: "oss-cn-shanghai",
+          accessKeyId: 'LTAI1aqBIXNSxkkM',//填入自己的id
+          accessKeySecret: 'Bg6YQOpE0mEUdLXl5yQKuoyfarTlqi',//填入自己的id
+          bucket: 'doudouqianqian'
+      })
+        this.getAdList()
     },
     components:{
     },
@@ -189,6 +216,21 @@
       }
     },
     methods: {
+    	showAdd(actionType,row){
+    		this.actionType=actionType;
+    		if(!actionType){
+    			this.ruleForm={...row}
+    		}
+    		this.dialogVisible=true
+    	},
+    	fnUploadRequest(option){
+    		console.log(option)
+    		    this.client.put('banner', option.file).then((val) => {
+		         	console.log(val)
+		        }, err => {
+		        })
+			console.log(option.file)
+    	},
       changeInp(val){
         console.log(val)
         // value=value.replace(/[\W]/g,'')
@@ -207,21 +249,21 @@
       },
       getAdList(){
         this.$api.channel.getAdList({
-          pageNo:this.currentPage,
+          pageNum:this.currentPage,
           pageSize:this.pageSize,
           loginName:this.loginName
         }).then((res)=>{
-          this.tableData=res.data.records;
+          this.tableData=res.data.list;
           this.total=res.data.total
         })
       },
       handleCurrentChange(val){
         this.currentPage=val;
-        this.getChannelList()
+        this.getAdList()
       },
       handleSizeChange(val){
         this.pageSize=val;
-        this.getChannelList()
+        this.getAdList()
       },
       delAd(row){
       	this.$toolkit.showConfrim('确定要删除此广告位吗？','提示').then(()=>{
@@ -231,11 +273,12 @@
           })
         })
       },
-      getChannel(formName){
+      addAd(formName){
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            this.$api.channel.addChannel(this.ruleForm).then(()=>{
-              this.$message.success("渠道添加成功!");
+          	let url=this.actionType?'addAd':'editAd';
+            this.$api.channel[url](this.ruleForm).then(()=>{
+              this.$message.success("广告位添加成功!");
               this.readyAjax();
               this.dialogVisible=false
             })
