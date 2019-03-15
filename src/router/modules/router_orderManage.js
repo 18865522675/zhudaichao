@@ -17,6 +17,16 @@ const router_module = {
       component: resolve =>
         require(["@/views/productManage/loanProduct.vue"], resolve)
     },
+    {
+      name:"productManage/creditCard",
+      path:"/productManage/creditCard",
+      meta:{
+        title:"信用卡产品",
+        show:true
+      },
+      component: resolve =>
+        require(["@/views/productManage/creditCard.vue"], resolve)
+    },
   ]
 };
 
