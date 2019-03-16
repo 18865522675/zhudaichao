@@ -91,19 +91,18 @@
                     @close="handleClose">
                 <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
                 	<el-form-item label="广告图片 :">
-                       <!--<el-upload
+                       <el-upload
 						  class="avatar-uploader"
 						 :http-request="fnUploadRequest"
 						  :show-file-list="false"
-						  action=""
 						  :with-credentials="true"
 						  :on-success="handleAvatarSuccess"
 						  :before-upload="beforeAvatarUpload">
-						  <img v-if="imageUrl" :src="imageUrl" class="avatar">
+						  <img v-if="ruleForm.imageUrl" :src="ruleForm.imageUrl" class="avatar">
 						  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-						</el-upload>-->
+						</el-upload>
 						<!--<input type="file" @change="inpChange" />-->
-						<baseUpload typeArr="image/png,image/jpg,image/gif,image/jpeg" size="5000000000"></baseUpload>
+						<!--<baseUpload typeArr="image/png,image/jpg,image/gif,image/jpeg" size="5000000000"></baseUpload>-->
                     </el-form-item>
                     <!--<el-form-item label="是否跳转 :" prop="loginName">
                         <el-input v-model.trim="ruleForm.loginName"    auto-complete="new-password"  placeholder="请输入账号(由数字和字母组成)"></el-input>
@@ -161,15 +160,15 @@
       return {
         tableForm:{
           time:"",
-          imageUrl:"",
-          title:"",
-          type:"",
-          status:1	,
-          bannerName:""
         },
         dialogVisible:false,
         ruleForm:{
-        	status:1
+        	status:1,
+        	imageUrl:"",
+            title:"",
+            type:"",
+            bannerName:"",
+            linkUrl:""
         },
         currentPage:1,
         pageSize:10,
@@ -196,7 +195,8 @@
         },
         total:0,
 //      client:null,
-        actionType:true
+        actionType:true,
+        imgSrc:""
       }
     },
     mounted() {
@@ -245,18 +245,20 @@
     	},
     	fnUploadRequest(option){
     		console.log(option)
-    		    this.client.put('banner'+option.filename,option.file).then((val) => {
-		         	console.log(val)
-		        }, err => {
-		        	console.log(err)
-		        })
+    		var reader = new FileReader();
+    	    reader.readAsDataURL(option.file);
+    	    const that=this;
+    	    reader.onload = function (e) {
+    	    	that.$api.product.uploadImg({
+    	    		"base64":that.ruleForm.imageUrl
+    	    	}).then((res)=>{
+    	    		that.ruleForm.imageUrl=res.data	
+    	    	})
+    	    }
     	},
       changeInp(val){
         console.log(val)
         // value=value.replace(/[\W]/g,'')
-      },
-      handleClose(){
-        this.ruleForm={};
       },
       reset(){
         this.loginName="";
@@ -296,6 +298,9 @@
       addAd(formName){
         this.$refs[formName].validate((valid) => {
           if (valid) {
+          	if(!this.ruleForm.imageUrl){
+          		return this.$message.warning('请选择广告位图片')
+          	}
           	let url=this.actionType?'addAd':'editAd';
             this.$api.channel[url](this.ruleForm).then(()=>{
               this.$message.success("广告位添加成功!");

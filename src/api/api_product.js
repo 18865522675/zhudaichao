@@ -24,6 +24,9 @@ export default {
    
    addBank: params => $.post("/bank/submit", params, { lock: true }),
    
+   
+   uploadImg: params => $.post("/image/upload", params, { lock: true }),
+   
 
   // 订单管理-当日应还款订单
   getTodayShouldPayList: params => $.get("/loanOrder/loanOrderHisList", params, { lock: true }),
