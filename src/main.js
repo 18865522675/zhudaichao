@@ -17,6 +17,11 @@ viewer.setDefaults({
 });
 
 
+// 表格封面
+import tableCover from "@/components/tableCover.vue";
+Vue.component("tableCover", tableCover);
+
+
 
 import api from "@/api";
 Vue.prototype.$api=api;

@@ -132,6 +132,9 @@
                         <el-table-column
                                 prop="logo"
                                 label="产品图片">
+                         <template slot-scope="scope">
+                         	<tableCover :url="scope.row.logo"></tableCover>
+                         </template>
                         </el-table-column>
                         <el-table-column
                                 prop="weight"

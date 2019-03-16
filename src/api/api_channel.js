@@ -45,6 +45,17 @@ export default {
   getCreditPlateList: params => $.post("/credit/card/getProductPlate", params, { lock: true }),
   
   
+  getChannelTranList: params => $.get("/product/data/getChannelDetail", params, { lock: true }),
+  
+  getChannelTransTopInfo: params => $.get("/product/data/getChannelTop", params, { lock: true }),
+  
+  getProductTopInfo: params => $.get("/product/data/getProductTop", params, { lock: true }),
+  
+  getProductDataList: params => $.get("/product/data/getProductDetail", params, { lock: true }),
+  
+  
+  
+  
 
 
 };

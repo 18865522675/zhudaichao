@@ -20,6 +20,10 @@ export default {
    
    editCreditCard: params => $.post("/credit/card/update", params, { lock: true }),
    
+   getBankList: params => $.get("/bank/list", params, { lock: true }),
+   
+   addBank: params => $.post("/bank/submit", params, { lock: true }),
+   
 
   // 订单管理-当日应还款订单
   getTodayShouldPayList: params => $.get("/loanOrder/loanOrderHisList", params, { lock: true }),

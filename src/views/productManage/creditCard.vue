@@ -114,54 +114,11 @@
                         </div>
                     </div>-->
                     <el-row type="flex" class="row-bg" style="flex-wrap: wrap;justify-content: flex-end;margin-right: 0px;" :gutter="50">
-                   		 <el-button  icon="el-icon-plus"  class="plusBtn" @click="showAdd(true)">新增产品</el-button>
+                   		 <el-button  icon="el-icon-plus"  class="plusBtn" v-if="activeName=='creditCard'" @click="showAdd(true)">新增产品</el-button>
+                   		 <el-button  icon="el-icon-plus"  class="plusBtn" v-else @click="addBankDialogVisible=true">新增银行</el-button>
                     <!--19BE6B-->
                     </el-row>
-                    <el-table
-                            border
-                            class="cardTable marT20"
-                            ref="multipleTable"
-                            :data="okOrderList"
-                            tooltip-effect="dark"
-                            style="width: 100%"
-                            @selection-change="handleSelectionChange">
-                        <el-table-column
-                                prop="productName"
-                                label="产品名称">
-                        </el-table-column>
-                        <el-table-column
-                                prop="logo"
-                                label="信用卡图片">
-                        </el-table-column>
-                        <el-table-column
-                                prop="weight"
-                                label="权重"
-                                show-overflow-tooltip>
-                        </el-table-column>
-                        <el-table-column
-                                prop="plateName"
-                                label="所属板块"
-                                show-overflow-tooltip >
-                        </el-table-column>
-                        <el-table-column
-                                prop="productCategoryId"
-                                label="产品类别"
-                                show-overflow-tooltip >
-                        </el-table-column>
-                        <el-table-column
-                                prop="productInfo"
-                                label="产品简介"
-                                show-overflow-tooltip >
-                        </el-table-column>
-                        <el-table-column
-                                fixed="right"
-                                label="操作" width="230">
-                            <template slot-scope="scope">
-                                <el-button size="mini" plain class="aplus-pribtn"  @click="showAdd(false,scope.row)" >编辑</el-button>
-                                <el-button size="mini" plain class="aplus-errorBtn" @click="delCredit(scope.row)" >删除</el-button>
-                            </template>
-                        </el-table-column>
-                    </el-table>
+                   
                     <!--<div class="block pagiWrap" style="margin-top: 20px">
                         <el-pagination
                                 @size-change="handleSizeChange"
@@ -173,6 +130,96 @@
                                 :total="total">
                         </el-pagination>
                     </div>-->
+                    
+                      <el-tabs v-model="activeName" @tab-click="readyAjax">
+					    <el-tab-pane label="信用卡" name="creditCard">
+					    	 <el-table
+		                            border
+		                            class="cardTable marT20"
+		                            ref="multipleTable"
+		                            :data="okOrderList"
+		                            tooltip-effect="dark"
+		                            style="width: 100%">
+		                        <el-table-column
+		                                prop="name"
+		                                label="产品名称">
+		                        </el-table-column>
+		                        <el-table-column
+		                                prop="logo"
+		                                label="信用卡图片">
+		                             <template slot-scope="scope">
+			                         	<tableCover :url="scope.row.logo"></tableCover>
+			                         </template>
+		                        </el-table-column>
+		                        <el-table-column
+		                                prop="weight"
+		                                label="权重"
+		                                show-overflow-tooltip>
+		                        </el-table-column>
+		                        <el-table-column
+		                                prop="plateName"
+		                                label="所属板块"
+		                                show-overflow-tooltip >
+		                        </el-table-column>
+		                        <el-table-column
+		                                prop="productCategoryId"
+		                                label="产品类别"
+		                                show-overflow-tooltip >
+		                        </el-table-column>
+		                        <el-table-column
+		                                prop="productInfo"
+		                                label="产品简介"
+		                                show-overflow-tooltip >
+		                        </el-table-column>
+		                        <el-table-column
+		                                fixed="right"
+		                                label="操作" width="230">
+		                            <template slot-scope="scope">
+		                                <el-button size="mini" plain class="aplus-pribtn"  @click="showAdd(false,scope.row)" >编辑</el-button>
+		                                <el-button size="mini" plain class="aplus-errorBtn" @click="delCredit(scope.row)" >删除</el-button>
+		                            </template>
+		                        </el-table-column>
+		                   </el-table>
+					    </el-tab-pane>
+					    
+					    <el-tab-pane label="银行" name="bank">
+					    	<el-table
+		                            border
+		                            class="cardTable marT20"
+		                            ref="multipleTable"
+		                            :data="bankList"
+		                            tooltip-effect="dark"
+		                            style="width: 100%">
+		                        <el-table-column
+		                                prop="bankName"
+		                                label="银行名称">
+		                        </el-table-column>
+		                        <!--<el-table-column
+		                                prop="logo"
+		                                label="银行logo">
+		                        </el-table-column>-->
+		                        <el-table-column
+		                                fixed="right"
+		                                label="操作" width="230">
+		                            <template slot-scope="scope">
+		                                <el-button size="mini" plain class="aplus-pribtn"  @click="showAdd(false,scope.row)" >编辑</el-button>
+		                                <el-button size="mini" plain class="aplus-errorBtn" @click="delCredit(scope.row)" >删除</el-button>
+		                            </template>
+		                        </el-table-column>
+		                    </el-table>
+		                    <div class="block pagiWrap" style="margin-top: 20px">
+		                        <el-pagination
+		                                @size-change="handleSizeChange"
+		                                @current-change="handleCurrentChange"
+		                                :current-page="currentPage"
+		                                :page-sizes="[10, 20, 30, 50]"
+		                                :page-size="pageSize"
+		                                layout="total, sizes, prev, pager, next, jumper"
+		                                :total="total">
+		                        </el-pagination>
+		                    </div>
+					    </el-tab-pane>
+					  </el-tabs>
                 </div>
             </div>
 
@@ -258,6 +305,25 @@
 			  <span slot="footer" class="dialog-footer">
 			    <el-button @click="dialogVisible = false">取 消</el-button>
 			    <el-button type="primary" @click="sureAdd">确 定</el-button>
+			  </span>
+			</el-dialog>
+			
+			
+			<!--新增银行-->
+			<el-dialog
+			  title="新增银行卡"
+			  :visible.sync="addBankDialogVisible"
+			  width="600px">
+			  <div>
+			  	<el-form :model="bankForm" :rules="bankRules" ref="bankForm" label-width="100px" class="demo-ruleForm">
+				  <el-form-item label="银行名称" prop="bankName">
+				    <el-input v-model.trim="bankForm.bankName"></el-input>
+				  </el-form-item>
+				</el-form>
+			  </div>
+			  <span slot="footer" class="dialog-footer">
+			    <el-button @click="dialogVisible = false">取 消</el-button>
+			    <el-button type="primary" @click="sureAddBank('bankForm')">确 定</el-button>
 			  </span>
 			</el-dialog>
 
@@ -349,6 +415,15 @@
             trigger: 'blur'
           }],   
         },
+        activeName:'creditCard',
+        bankList:[],
+        addBankDialogVisible:false,
+        bankForm:{},
+        bankRules: {
+          bankName: [
+            { required: true, message: '请输入银行名称', trigger: 'blur' },
+          ],
+        }
       };
     },
     mounted() {
@@ -375,6 +450,22 @@
       }
     },
     methods:{
+      sureAddBank(formName){
+      	 this.$refs[formName].validate((valid) => {
+          if (valid) {
+            this.$api.product.addBank(this.bankForm).then((res)=>{
+            	this.$message.success("银行新增成功");
+            	this.readyAjax();
+            	this.addBankDialogVisible=false;
+            }).catch((e)=>{
+            	this.$message.error(e.msg);
+            })
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
       sureAdd(){
       	if(this.actionType){
       		this.$api.product.addCreditCard({
@@ -415,7 +506,12 @@
       readyAjax(){
         this.currentPage=1;
         this.pageSize=10;
-        this.getOkOrdersList()
+        if(this.activeName=='creditCard'){
+        	this.getOkOrdersList()	
+        }else{
+        	this.getBankList()	
+        }
+        
       },
       reset(){
         for(let i in this.tableForm){
@@ -438,6 +534,16 @@
           this.okOrderList=res.data;
 //        this.condition=res.data.condition
 //        this.total=res.data.total
+        })
+      },
+      getBankList(){
+        this.$api.product.getBankList({
+        	pageNum:this.currentPage,
+        	pageSize:this.pageSize
+        }).then((res)=>{
+          this.bankList=res.data.list;
+//        this.condition=res.data.condition
+          this.total=res.data.total
         })
       },
       getProductTypeList(){

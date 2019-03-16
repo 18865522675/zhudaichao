@@ -36,6 +36,9 @@
                         <el-table-column
                                 prop="imageUrl"
                                 label="广告图片">
+                         <template slot-scope="scope">
+                         	<tableCover :url="scope.row.imageUrl"></tableCover>
+                         </template>
                         </el-table-column>
                         <el-table-column
                                 prop="loginName"
@@ -88,7 +91,7 @@
                     @close="handleClose">
                 <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
                 	<el-form-item label="广告图片 :">
-                       <el-upload
+                       <!--<el-upload
 						  class="avatar-uploader"
 						 :http-request="fnUploadRequest"
 						  :show-file-list="false"
@@ -98,7 +101,9 @@
 						  :before-upload="beforeAvatarUpload">
 						  <img v-if="imageUrl" :src="imageUrl" class="avatar">
 						  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-						</el-upload>
+						</el-upload>-->
+						<!--<input type="file" @change="inpChange" />-->
+						<baseUpload typeArr="image/png,image/jpg,image/gif,image/jpeg" size="5000000000"></baseUpload>
                     </el-form-item>
                     <!--<el-form-item label="是否跳转 :" prop="loginName">
                         <el-input v-model.trim="ruleForm.loginName"    auto-complete="new-password"  placeholder="请输入账号(由数字和字母组成)"></el-input>
@@ -135,8 +140,9 @@
 </template>
 <script>
 
-  import OSS from "ali-oss"
+//import OSS from "ali-oss"
   import { mapState } from 'vuex';
+  import baseUpload from "@/components/baseUpload.vue"
   export default {
     name: "channelList",
     data() {
@@ -189,20 +195,24 @@
          
         },
         total:0,
-        client:null,
+//      client:null,
         actionType:true
       }
     },
     mounted() {
-    	 this.client = new OSS({
-          region: "oss-cn-shanghai",
-          accessKeyId: 'LTAI1aqBIXNSxkkM',//填入自己的id
-          accessKeySecret: 'Bg6YQOpE0mEUdLXl5yQKuoyfarTlqi',//填入自己的id
-          bucket: 'doudouqianqian'
-      })
+//  	 this.client = new OSS({
+//        region: "oss-cn-shanghai",
+//        accessKeyId: 'LTAI1aqBIXNSxkkM',//填入自己的id
+//        accessKeySecret: 'Bg6YQOpE0mEUdLXl5yQKuoyfarTlqi',//填入自己的id
+////        stsToken:'',
+//        bucket: 'doudouqianqian',
+////        endpoint:'http://oss-cn-shanghai'
+//    })
+//		console.log(OSS.Wrapper)
         this.getAdList()
     },
     components:{
+    	baseUpload
     },
     computed: mapState([
       // map this.count to store.state.count
@@ -216,6 +226,16 @@
       }
     },
     methods: {
+//  	async inpChange(ev){
+//			let client= new OSS({
+//			  accessKeyId: 'LTAI1aqBIXNSxkkM',
+//			  accessKeySecret: 'Bg6YQOpE0mEUdLXl5yQKuoyfarTlqi',
+//			  bucket: 'doudouqianqian',
+//			  region: 'oss-cn-shanghai'
+//			});
+//			let res=await client.put('banner', ev.target.files[0]);
+//			console.log(res)
+//  	},
     	showAdd(actionType,row){
     		this.actionType=actionType;
     		if(!actionType){
@@ -224,7 +244,8 @@
     		this.dialogVisible=true
     	},
     	fnUploadRequest(option){
-    		    this.client.multipartUpload('banner'+option.filename,option.file).then((val) => {
+    		console.log(option)
+    		    this.client.put('banner'+option.filename,option.file).then((val) => {
 		         	console.log(val)
 		        }, err => {
 		        	console.log(err)

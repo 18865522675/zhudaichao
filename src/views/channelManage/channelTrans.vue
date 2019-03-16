@@ -10,25 +10,25 @@
                         <div>
                             渠道注册量
                         </div>
-                        <span>8</span>
+                        <span>{{topData.channelRegister}}</span>
                     </div>
                     <div class="aplus-staticWrap-item flex-c" >
                         <div>
                             总下载激活
                         </div>
-                        <span>100</span>
+                        <span>{{topData.download}}</span>
                     </div>
                     <div class="aplus-staticWrap-item flex-c">
                         <div>
                             甲方有效点击次数
                         </div>
-                        <span>8</span>
+                        <span>{{topData.usreClicked}}</span>
                     </div>
                     <div class="aplus-staticWrap-item flex-c">
                         <div>
                             激活转化率
                         </div>
-                        <span>10%</span>
+                        <span>{{topData.activePervent?(topData.activePervent*100).toFixed(2)+'%':'0.00%'}}</span>
                     </div>
                 </div>
                 <div class="cardBodyHeader marT20">
@@ -36,12 +36,13 @@
                         <el-col :span="7">
                             <div class="flex-r global-childItem">
                                 <span class="smallSpan">渠道商</span>
-                                <el-select  v-model="tableForm.channelId"  filterable  class="aplus-sel"    placeholder="请选择渠道商" style="width: 100%">
-                                    <el-option label="全部" value=""></el-option>
-                                    <el-option v-for="(item,index) in channelList" :key="index" :label="item.userName" :value="item.id"></el-option>
-                                </el-select>
+                                <el-input placeholder="请输入渠道名称"  v-model.trim="tableForm.channelName" class="aplus-norInp"></el-input>
                             </div>
                         </el-col>
+                        <!--<div class="topTableForm-item">
+                        	<span>字段查询	 :</span>
+                            <el-input placeholder="请输入号码/姓名/渠道"  v-model.trim="tableForm.parameter" class="aplus-norInp"></el-input>
+                        </div>-->
                         <el-col :span="7">
                             <div class="flex-r global-childItem">
                                 <span class="smallSpan bigSpan" style="width: 60px!important;">日 期 </span>
@@ -76,13 +77,8 @@
                                         class="cardTable"
                                         style="width: 100%">
                                     <el-table-column
-
-                                            prop="reportDate"
-                                            label="日期"
-                                            :formatter="$toolkit.formatTimeTable">
-                                        <template slot-scope="scope">
-                                            {{$toolkit.formatTime(scope.row.reportDate,false)}}
-                                        </template>
+                                            prop="date"
+                                            label="日期">
                                     </el-table-column>
                                     <el-table-column
                                             prop="channelName"
@@ -91,29 +87,35 @@
                                             label="渠道名称">
                                     </el-table-column>
                                     <el-table-column
-                                            prop="PV"
+                                            prop="pv"
                                             :show-overflow-tooltip="true"
                                             label="PV">
                                     </el-table-column>
                                     <el-table-column
-                                            prop="h5UniqueVisitor"
+                                            prop="uv"
                                             :show-overflow-tooltip="true"
                                             label="UV">
                                     </el-table-column>
                                     <el-table-column
-                                            prop="h5RegisterNum"
+                                            prop="register"
                                             label="平台注册数"
                                             :show-overflow-tooltip="true">
                                     </el-table-column>
                                     <el-table-column
-                                            prop="appDownloadActiveNum"
+                                            prop="active"
                                             :show-overflow-tooltip="true"
                                             label="APP下载激活">
+                                    <template slot-scope="scope">
+                                    	{{scope.row.active||0}}
+                                    </template>
                                     </el-table-column>
                                     <el-table-column
                                             :show-overflow-tooltip="true"
-                                            prop="authPassNum"
+                                            prop="activePercent"
                                             label="激活转化率">
+                                      <template slot-scope="scope">
+                                    	{{scope.row.activePercent?(scope.row.activePercent*100).toFixed(2)+'%':'0.00%'}}
+                                      </template>
                                     </el-table-column>
                                     <!--<el-table-column-->
                                             <!--:show-overflow-tooltip="true"-->
@@ -122,12 +124,12 @@
                                     <!--</el-table-column>-->
                                     <el-table-column
                                             :show-overflow-tooltip="true"
-                                            prop="applyOrderNum"
+                                            prop="clickUser"
                                             label="甲方有效点击会员数">
                                     </el-table-column>
                                     <el-table-column
                                             :show-overflow-tooltip="true"
-                                            prop="loanOrderNum"
+                                            prop="clickNum"
                                             label="甲方有效点击量">
                                     </el-table-column>
                                     <!--<el-table-column-->
@@ -247,12 +249,13 @@
         channelList:[],
         loading:false,
 
-        activeName:"time"
+        activeName:"time",
+        topData:{}
       };
     },
     mounted() {
-      this.channelList_getList()
-      this.getList();
+//    this.channelList_getList()
+      this.readyAjax();
     },
     components:{
       baseDelBtn
@@ -271,25 +274,25 @@
         }
         this.readyAjax()
       },
-      channelList_getList(){
-        this.$api.channel.channelList_getList().then((res)=>{
-          // this.channelList=res.data
-          for(let i in res.data){
-            let obj={
-              userName:res.data[i].name,
-              id:res.data[i].id
-            }
-            this.channelList.push(obj)
-          }
-        })
-      },
+//    channelList_getList(){
+//      this.$api.channel.channelList_getList().then((res)=>{
+//        // this.channelList=res.data
+//        for(let i in res.data){
+//          let obj={
+//            userName:res.data[i].name,
+//            id:res.data[i].id
+//          }
+//          this.channelList.push(obj)
+//        }
+//      })
+//    },
       getList(){
         this.loading=true;
         if(this.tableForm.time){
           this.tableForm.startTime=this.$toolkit.formatTime(this.tableForm.time[0],false);
           this.tableForm.endTime=this.$toolkit.formatTime(this.tableForm.time[1],false);
         }
-        let url=this.activeName=='time'?'channelTrans_getList':'channelTrans_getRegisterList'
+        let url=this.activeName=='time'?'getChannelTranList':'channelTrans_getRegisterList'
         // if(this.activeName=='time')
         this.$api.channel[url]({
            pageNum:this.currentPage,
@@ -305,7 +308,18 @@
       readyAjax(){
         this.currentPage=1;
         this.pageSize=10;
-        this.getList()
+        this.getList();
+        this.getChannelTransTopInfo()
+      },
+      getChannelTransTopInfo(){
+      	this.$api.channel.getChannelTransTopInfo({
+            startTime:this.tableForm.startTime,
+            endTime:this.tableForm.endTime
+          }
+        ).then((res)=>{
+          this.loading=false;
+          this.topData=res.data;
+        })	
       },
       handleCurrentChange(val){
         this.currentPage=val;
