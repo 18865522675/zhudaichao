@@ -79,15 +79,15 @@
                     <div class="topTableForm">
                     	<div class="topTableForm-item" style="width:380px!important">
                             <span>产品类别 : </span>
-                             <el-select  v-model="tableForm.status"   class="aplus-sel"    placeholder="请选择产品类别" style="width: 100%">
+                             <el-select  v-model="tableForm.productCategoryId"   class="aplus-sel"    placeholder="请选择产品类别" style="width: 100%">
                                 <el-option label="全部" value=""></el-option>
                       			<el-option v-for="(item,index) in typeList" :key="index"  :label="item.name"   :value="item.id"></el-option>
-                      			
+       			
                             </el-select>
                         </div>
                         <div class="topTableForm-item">
                         	<span>产品名称 :</span>
-                            <el-input placeholder="请输入产品名称"  v-model.trim="tableForm.parameter" class="aplus-norInp"></el-input>
+                            <el-input placeholder="请输入产品名称"  v-model.trim="tableForm.productName" class="aplus-norInp"></el-input>
                         </div>
                         <div class="topTableForm-item-actions">
                             <el-button type="primary" icon="el-icon-search" class="reloadBtn marL10" @click="readyAjax">查询</el-button>
@@ -160,7 +160,7 @@
                                 fixed="right"
                                 label="操作" width="230">
                             <template slot-scope="scope">
-                                <el-button size="mini" plain class="aplus-pribtn" @click="delChannel(scope.row)" >编辑</el-button>
+                                <el-button size="mini" plain class="aplus-pribtn" @click="showAdd(false,scope.row)" >编辑</el-button>
                                 <el-button size="mini" plain class="aplus-errorBtn" @click="downProduct(scope.row)" >下架</el-button>
                             </template>
                         </el-table-column>
@@ -197,7 +197,7 @@
 						  :with-credentials="true"
 						  :on-success="handleAvatarSuccess"
 						  :before-upload="beforeAvatarUpload">
-						  <img v-if="imageUrl" :src="imageUrl" class="avatar">
+						  <img v-if="ruleForm.product.logo" :src="ruleForm.product.logo" class="avatar">
 						  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
 						</el-upload>
                     </el-form-item>
@@ -229,7 +229,9 @@
 	                        <el-input v-model.trim="ruleForm.product.requireInfo"   auto-complete="new-password"  placeholder="请输入所需资料"></el-input>
 	                    </el-form-item>
 	                    <el-form-item label="产品类别 :" prop="productCategoryId">
-	                        <el-input v-model.trim="ruleForm.product.productCategoryId"   auto-complete="new-password"  placeholder="请输入产品类别"></el-input>
+ 							<el-select style="width: 100%" v-model="ruleForm.product.productCategoryId" multiply placeholder="请选择产品类别">
+                                    <el-option v-for="(item,index) in typeList" :key="index" :label="item.name" :value="item.id"></el-option>
+                             </el-select>	                    
 	                    </el-form-item>
 	                    <el-form-item label="所属板块 :" prop="plateId">
 	                    	 <el-select style="width: 100%" v-model="ruleForm.product.plateId" multiply placeholder="请选择所属板块">
@@ -293,15 +295,8 @@
       	dialogVisible:false,
       	actionType:true,
         tableForm:{
-          time:"",
-          time1:"",
-          loan_staus:"",
-          limit_pay_time_start:"",
-          limit_pay_time_end:"",
-          give_time_start:"",
-          give_time_end:"",
-          parameter:"",
-          is_old:""
+        	productCategoryId:'',
+        	productName:""
         },
         type:"1",
         typeList:[],
@@ -343,7 +338,6 @@
 			    "logo": "",
 			    "paymentType": "",
 			    "plateId": "",
-			    "plateName": "",
 			    "productCategoryId": "",
 			    "productDescribe": "",
 			    "productInfo": "",
@@ -410,19 +404,50 @@
       }
     },
     methods:{
+    	fnUploadRequest(option){
+			var reader = new FileReader();
+		    reader.readAsDataURL(option.file);
+		    const that=this;
+		    reader.onload = function (e) {
+		    	that.$api.product.uploadImg({
+		    		"base64":e.target.result.split("base64,")[1]
+		    	}).then((res)=>{
+		    		that.ruleForm.product.logo=res.data	
+		    	})
+		    }
+		},
       sureAdd(){
       	if(this.actionType){
-      		this.$api.product.addLoanProduct({
-      			productAddPO:this.ruleForm
-      		}).then((res)=>{
-      			
+//    		for(let i in this.ruleForm){
+//    			for(let k in this.ruleForm[i]){
+//    				if(this.ruleForm[i][k]==""){
+//    					return this.$message.warning("请填完完整信息")
+//    				}
+//    			}
+//    		}
+      		this.$api.product.addLoanProduct(this.ruleForm).then((res)=>{
+      			this.$message.success("新增成功");
+      			this.readyAjax();
+      			this.dialogVisible=false;
+      		})
+      	}else{
+      		this.$api.product.editLoanProduct(this.ruleForm).then((res)=>{
+      			this.$message.success("编辑成功");
+      			this.readyAjax();
+      			this.dialogVisible=false;
       		})
       	}
       },
       showAdd(actionType,row){
       	this.actionType=actionType;
       	if(!actionType){
-//    		this
+      		this.$api.product.getLoanProductDetail({
+      			productId:row.id
+      		}).then((res)=>{
+      			this.ruleForm={...res.data}
+      		}).catch((e)=>{
+      			this.$message.error(e.msg)
+      		})
       	}
       	this.dialogVisible=true
       },

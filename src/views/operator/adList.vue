@@ -114,7 +114,9 @@
                     <el-input v-model.trim="ruleForm.linkUrl"   auto-complete="new-password"  placeholder="请输入跳转链接"></el-input>
                     </el-form-item>
                     <el-form-item label="广告类型 :" prop="type">
-                    	        <el-input v-model.trim="ruleForm.type"   auto-complete="new-password" 	 placeholder="请输入广告类型"></el-input>
+                    	        <el-select style="width: 100%" v-model="ruleForm.type" multiply placeholder="请选择广告类型">
+                                    <el-option v-for="(item,index) in adTypeList" :key="index" :label="item.name" :value="item.id"></el-option>
+                             </el-select>
                     </el-form-item>
                     <el-form-item label="是否上架 :" prop="status">
                     	  <el-radio v-model="ruleForm.status" :label="1">是</el-radio>
@@ -196,7 +198,8 @@
         total:0,
 //      client:null,
         actionType:true,
-        imgSrc:""
+        imgSrc:"",
+        adTypeList:[]
       }
     },
     mounted() {
@@ -209,7 +212,8 @@
 ////        endpoint:'http://oss-cn-shanghai'
 //    })
 //		console.log(OSS.Wrapper)
-        this.getAdList()
+        this.getAdList();
+        this.getAdTypeList();
     },
     components:{
     	baseUpload
@@ -236,6 +240,16 @@
 //			let res=await client.put('banner', ev.target.files[0]);
 //			console.log(res)
 //  	},
+		handleClose(){
+			this.ruleForm={
+        	status:1,
+        	imageUrl:"",
+            title:"",
+            type:"",
+            bannerName:"",
+            linkUrl:""
+           }
+		},
     	showAdd(actionType,row){
     		this.actionType=actionType;
     		if(!actionType){
@@ -249,8 +263,9 @@
     	    reader.readAsDataURL(option.file);
     	    const that=this;
     	    reader.onload = function (e) {
+    	    	console.log(e.target.result)
     	    	that.$api.product.uploadImg({
-    	    		"base64":that.ruleForm.imageUrl
+    	    		"base64":e.target.result.split("base64,")[1]
     	    	}).then((res)=>{
     	    		that.ruleForm.imageUrl=res.data	
     	    	})
@@ -312,6 +327,14 @@
             return false;
           }
         });
+      },
+      getAdTypeList(){
+      	 this.$api.channel.getAdTypeList({
+      	 	pageNum:1,
+      	 	pageSize:1000
+      	 }).then((res)=>{
+          this.adTypeList=res.data.list
+        })
       }
 
     },
