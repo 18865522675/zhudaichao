@@ -55,6 +55,10 @@ export default {
  
   getAdTypeList: params => $.get("/bannerType/list", params, { lock: true }),
   
+  
+  setLoanAndRegister: params => $.post("/product/data/setLoanAndRegister", params, { lock: true }),
+  
+  
   getCurrentTypeList: params => $.get("/bankCurrency/list", params, { lock: true }),
   
   getBankFeeList: params => $.get("/bankAnfee/list", params, { lock: true }),

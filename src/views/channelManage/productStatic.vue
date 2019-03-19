@@ -71,7 +71,7 @@
                                         element-loading-text="拼命加载中"
                                         element-loading-spinner="el-icon-loading"
                                         class="cardTable"
-                                        style="width: 100%">
+                                        style="width: 100%" @cell-click="cellClick">
                                     <el-table-column
                                             prop="dateTime"
                                             label="日期">
@@ -104,11 +104,19 @@
                                             prop="register"
                                             :show-overflow-tooltip="true"
                                             label="产品注册数">
+                                           <template slot-scope="scope">
+                                           	    <el-input v-if="scope.row.registerClick" v-model="scope.row.register"></el-input>
+                                           		<span  v-else>{{scope.row.register}}</span>
+                                           </template>
                                     </el-table-column>
                                     <el-table-column
                                             :show-overflow-tooltip="true"
                                             prop="loan"
                                             label="产品下款数">
+                                            <template slot-scope="scope">
+                                           	    <el-input v-if="scope.row.loanClick" v-model="scope.row.loan"></el-input>
+                                           		<span  v-else>{{scope.row.loan}}</span>
+                                           </template>
                                     </el-table-column>
                                     <!--<el-table-column-->
                                             <!--:show-overflow-tooltip="true"-->
@@ -243,7 +251,10 @@
         loading:false,
 
         activeName:"time",
-        topData:{}
+        topData:{},
+        loanClick:false,
+        registerClick:false,
+        nowPro:""
       };
     },
     mounted() {
@@ -266,6 +277,29 @@
           this.tableForm[i]=""
         }
         this.readyAjax()
+      },
+      cellClick(row,col){	
+      	if(col.property=='register'){
+      		let index=this.tableData.indexOf(row);
+      		console.log(index)
+      		this.$set(row,"registerClick",true)
+      		this.$set(this.tableData,this.tableData[index],row)
+      	}else if(col.property=='loan'){
+      		let index=this.tableData.indexOf(row);
+      		row.loanClick=true;
+      		this.$set(this.tableData,this.tableData[index],row)
+      	}	
+      },
+      setLoanAndRegister(row){
+      	this.$api.channel.setLoanAndRegister({
+      		productId:row.productId,
+      		loan:row.loan,
+      		register:row.register
+      	}).then((res)=>{
+      		this.readyAjax();
+      	}).catch((e)=>{
+      		this.$message.error(e.msg)
+      	})
       },
 //    channelList_getList(){
 //      this.$api.channel.channelList_getList().then((res)=>{
@@ -296,6 +330,10 @@
           this.loading=false;
           this.tableData=res.data.list;
           this.total=res.data.total;
+          this.tableData.map((item)=>{
+          	item.registerClick=false;
+          	item.loanClick=false;
+          })
         })
       },
       getProductTopInfo(){

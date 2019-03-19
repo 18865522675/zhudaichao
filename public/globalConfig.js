@@ -1,4 +1,4 @@
-﻿const HOST_IND = 2, // 切换服务器
+﻿const HOST_IND = 0, // 切换服务器
     HOST = [
       "http://47.111.12.25:8888/", // 正式服务器
       "http://192.168.43.59:8888/", //zhudaichao 德华
