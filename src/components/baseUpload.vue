@@ -75,6 +75,7 @@
             }
             this.getRight();
             console.log(file)
+            
             this.client.multipartUpload(storeAs, file).then(function (result) {
               console.log(result)//至此就拿到了返回的路径
     
