@@ -5,8 +5,10 @@ export default {
   getLoanProduct_list: params => $.get("/product/list", params, { lock: true }),
   
   
-   LoanUndercarriage: params => $.put("/product/undercarriage", params, { lock: true }),
+   LoanUndercarriage: params => $.put("/product/undercarriage/"+params, {}, { lock: true }),
    
+   LoanUpcarriage: params => $.put("/product/upcarriage/"+params, {}, { lock: true }),
+     
    getPlateList: params => $.put("/product/plate/list", params, { lock: true }),
    
    addLoanProduct: params => $.post("/product", params, { lock: true }),

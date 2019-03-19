@@ -16,7 +16,6 @@ export default {
   //渠道商-新会员分配
   channelList_addRecord: params => $.post("/member/operation/record", params, { lock: true }),
 
-
   //获取企业会员
   getEnderPriseList: params => $.get("/user/page", params, { lock: true }),
 
@@ -25,7 +24,10 @@ export default {
   //获取企业会员渠道商
   resetPas: params => $.get("/user/resetPassword", params, { lock: true }),
   //企业会员拉黑
-  memberSetBlack: params => $.put("/user/blacklist", params, { lock: true }),
+  memberSetBlack: params => $.put("/user/blacklist?userId="+params, {}, { lock: true }),
+  
+  removeBlack: params => $.put("/user/removeBlacklist?userId="+params, {}, { lock: true }),
+
 
   //企业会员移除黑名单
   memberRemoveBlack: params => $.get("/user/moveOutBlackList", params, { lock: true }),

@@ -85,7 +85,7 @@
                                     <el-table-column
                                             prop="h5Click"
                                             :show-overflow-tooltip="true"
-                                            label="H5访问量">
+                                            label="产品详情点击量">
                                      <template slot-scope="scope">
                                      	{{scope.row.h5Click||0}}
                                      </template>
@@ -93,11 +93,11 @@
                                     <el-table-column
                                             prop="pv"
                                             :show-overflow-tooltip="true"
-                                            label="PV">
+                                            label="h5(pv)">
                                     </el-table-column>
                                     <el-table-column
                                             prop="uv"
-                                            label="UV"
+                                            label="h5(uv)"
                                             :show-overflow-tooltip="true">
                                     </el-table-column>
                                     <el-table-column
@@ -281,8 +281,9 @@
       getList(){
         this.loading=true;
         if(this.tableForm.time){
+          console.log(this.tableForm.time[1].getTime()+86400*1000)
           this.tableForm.startTime=this.$toolkit.formatTime(this.tableForm.time[0],false);
-          this.tableForm.endTime=this.$toolkit.formatTime(this.tableForm.time[1],false);
+          this.tableForm.endTime=this.$toolkit.formatTime(this.tableForm.time[1].getTime()+86400*1000,false);
         }
         let url=this.activeName=='time'?'getProductDataList':'channelTrans_getRegisterList'
         // if(this.activeName=='time')

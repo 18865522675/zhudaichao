@@ -110,7 +110,7 @@
                     <el-form-item label="广告名称 :" prop="bannerName">
                     <el-input v-model.trim="ruleForm.bannerName"   auto-complete="new-password"  placeholder="请输入广告名称"></el-input>
                     </el-form-item>
-                    <el-form-item label="跳转链接 :" prop="linkUrl">
+                    <el-form-item label="跳转链接 :">
                     <el-input v-model.trim="ruleForm.linkUrl"   auto-complete="new-password"  placeholder="请输入跳转链接"></el-input>
                     </el-form-item>
                     <el-form-item label="广告类型 :" prop="type">

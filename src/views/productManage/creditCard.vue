@@ -263,10 +263,10 @@
 	                        <el-input v-model.trim="ruleForm.name"   auto-complete="new-password"  placeholder="请输入信用卡名称"></el-input>
 	                    </el-form-item>
 	                    <el-form-item label="申请人数 :" prop="applyNum" >
-	                        <el-input v-model.trim="ruleForm.applyNum"   auto-complete="new-password"  placeholder="请输入申请人数"></el-input>
+	                        <el-input v-model.trim="ruleForm.applyNum"  onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number" min="0"  auto-complete="new-password"  placeholder="请输入申请人数"></el-input>
 	                    </el-form-item>
 	                    <el-form-item label="权重 :" prop="weight" >
-	                    	<el-input v-model.trim="ruleForm.weight"   auto-complete="new-password" 	 placeholder="请输入权重"></el-input>
+	                    	<el-input v-model.trim="ruleForm.weight" onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number" min="0"  auto-complete="new-password" 	 placeholder="请输入权重"></el-input>
 	                    </el-form-item>
                     </div>
                     <div class="formItemLine">
@@ -585,8 +585,8 @@
           			this.ruleForm.plateName=i.plateName
           		}
           	}
+            this.ruleForm.theme=this.ruleForm.theme.join(",")
           	if(this.actionType){
-		      		this.ruleForm.theme=this.ruleForm.theme.join(",")
 		      		this.$api.product.addCreditCard({
 		      			...this.ruleForm
 		      		}).then((res)=>{
@@ -595,6 +595,7 @@
 		      			this.readyAjax()
 		      		})
 		      	}else{
+		      		
 		      		this.$api.product.editCreditCard({
 		      			...this.ruleForm
 		      		}).then((res)=>{
