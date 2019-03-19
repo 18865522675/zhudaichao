@@ -90,12 +90,12 @@
                         <!--</div>-->
                         <div class="topTableForm-item" style="padding-right: 10px!important;">
                             <span>渠道商 : </span>
-                             <el-select  v-model="tableForm.channelId"  class="aplus-sel" placeholder="请选择会员来源" style="width: 100%">
+                             <el-select  v-model="tableForm.channelId" filterable class="aplus-sel" placeholder="请选择会员来源" style="width: 100%">
                                 <el-option label="全部" value=""></el-option>
                                 <el-option
                                         v-for="(item,index) in vipChannelList"
                                         :key="index"
-                                        :label="item.userName"
+                                        :label="item.name"
                                         :value="item.id">
                                 </el-option>
                             </el-select>
@@ -178,7 +178,8 @@
                                     label="操作" width="460">
                                 <template slot-scope="scope">
                                     <!--<el-button size="mini" plain class="aplus-pribtn">查看认证信息</el-button>-->
-                                    <el-button size="mini" plain class="aplus-pribtn" @click="setBlack(scope.row)">拉黑</el-button>
+                                    <el-button size="mini" plain class="aplus-errorBtn" @click="setBlack(scope.row)" v-if="scope.row.status==1">拉黑</el-button>
+                                    <el-button size="mini" plain class="aplus-pribtn" @click="removeBlack(scope.row)" v-else>移除黑名单</el-button>
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -372,7 +373,7 @@
       };
     },
     mounted() {
-//    this.getVipChannelList()
+      this.getVipChannelList()
       this.readyAjax()
     },
     components:{
@@ -397,10 +398,19 @@
     methods: {
 	  setBlack(row){
 	  	this.$toolkit.showConfrim(`确定要拉黑用户${row.userName}?`,'拉黑').then(()=>{
-	  		this.$api.member.memberSetBlack({
-	  			userId:row.id
-	  		}).then(()=>{
-	  			this.$message.success("拉黑成功")
+	  		this.$api.member.memberSetBlack(row.id).then(()=>{
+	  			this.$message.success("拉黑成功");
+	  			this.readyAjax();
+	  		}).catch((e)=>{
+	  			this.$message.error("拉黑失败")
+	  		})
+	  	})
+	  },
+	  removeBlack(row){
+	  	this.$toolkit.showConfrim(`确定将用户${row.userName}从黑名单中移除吗?`,'移除黑名单').then(()=>{
+	  		this.$api.member.removeBlack(row.id).then(()=>{
+	  			this.$message.success("拉黑成功");
+	  			this.readyAjax();
 	  		}).catch((e)=>{
 	  			this.$message.error("拉黑失败")
 	  		})
@@ -454,21 +464,14 @@
       },
       getVipChannelList(){
         this.$api.member.getVipChannelList().then((res)=>{
-          for(let i in res.data){
-            this.vipChannelList.push({
-              userName:res.data[i].loginName,
-              id:res.data[i].id
-            })
-          }
+          this.vipChannelList=res.data
         })
       },
       formats(row){
         switch(row.status){
           case 1:return "正常";break;
-          case 2:return "黑名单";break;
-          case 3:return "禁用";break;
-          case 4:return "被拒绝(一个月后可借款)";break;
-
+          case 0:return "黑名单";break;
+          case -1:return "删除";break;
         }
       },
       resetPas(row){

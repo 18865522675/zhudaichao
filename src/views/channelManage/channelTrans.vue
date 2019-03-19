@@ -20,7 +20,7 @@
                     </div>
                     <div class="aplus-staticWrap-item flex-c">
                         <div>
-                            甲方有效点击次数
+                            	产品h5点击量
                         </div>
                         <span>{{topData.usreClicked}}</span>
                     </div>
@@ -125,12 +125,12 @@
                                     <el-table-column
                                             :show-overflow-tooltip="true"
                                             prop="clickUser"
-                                            label="甲方有效点击会员数">
+                                            label="产品h5点击会员数">
                                     </el-table-column>
                                     <el-table-column
                                             :show-overflow-tooltip="true"
                                             prop="clickNum"
-                                            label="甲方有效点击量">
+                                            label="产品h5点击量">
                                     </el-table-column>
                                     <!--<el-table-column-->
                                             <!--:show-overflow-tooltip="true"-->
@@ -290,7 +290,7 @@
         this.loading=true;
         if(this.tableForm.time){
           this.tableForm.startTime=this.$toolkit.formatTime(this.tableForm.time[0],false);
-          this.tableForm.endTime=this.$toolkit.formatTime(this.tableForm.time[1],false);
+          this.tableForm.endTime=this.$toolkit.formatTime(this.tableForm.time[1].getTime()+86400*1000,false);
         }
         let url=this.activeName=='time'?'getChannelTranList':'channelTrans_getRegisterList'
         // if(this.activeName=='time')

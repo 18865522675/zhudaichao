@@ -39,7 +39,7 @@ export default {
   
   getProductTypeList: params => $.get("/product/category/list", params, { lock: true }),
   
-  getProductPlateList: params => $.get("/credit/card/getProductPlate", params, { lock: true }),
+  getProductPlateList: params => $.post("/credit/card/getProductPlate", params, { lock: true }),
   
   
   getCreditPlateList: params => $.post("/credit/card/getProductPlate", params, { lock: true }),
@@ -52,8 +52,12 @@ export default {
   getProductTopInfo: params => $.get("/product/data/getProductTop", params, { lock: true }),
   
   getProductDataList: params => $.get("/product/data/getProductDetail", params, { lock: true }),
+ 
+  getAdTypeList: params => $.get("/bannerType/list", params, { lock: true }),
   
+  getCurrentTypeList: params => $.get("/bankCurrency/list", params, { lock: true }),
   
+  getBankFeeList: params => $.get("/bankAnfee/list", params, { lock: true }),
   
   
 

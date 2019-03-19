@@ -91,19 +91,18 @@
                     @close="handleClose">
                 <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
                 	<el-form-item label="广告图片 :">
-                       <!--<el-upload
+                       <el-upload
 						  class="avatar-uploader"
 						 :http-request="fnUploadRequest"
 						  :show-file-list="false"
-						  action=""
 						  :with-credentials="true"
 						  :on-success="handleAvatarSuccess"
 						  :before-upload="beforeAvatarUpload">
-						  <img v-if="imageUrl" :src="imageUrl" class="avatar">
+						  <img v-if="ruleForm.imageUrl" :src="ruleForm.imageUrl" class="avatar">
 						  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-						</el-upload>-->
+						</el-upload>
 						<!--<input type="file" @change="inpChange" />-->
-						<baseUpload typeArr="image/png,image/jpg,image/gif,image/jpeg" size="5000000000"></baseUpload>
+						<!--<baseUpload typeArr="image/png,image/jpg,image/gif,image/jpeg" size="5000000000"></baseUpload>-->
                     </el-form-item>
                     <!--<el-form-item label="是否跳转 :" prop="loginName">
                         <el-input v-model.trim="ruleForm.loginName"    auto-complete="new-password"  placeholder="请输入账号(由数字和字母组成)"></el-input>
@@ -111,11 +110,13 @@
                     <el-form-item label="广告名称 :" prop="bannerName">
                     <el-input v-model.trim="ruleForm.bannerName"   auto-complete="new-password"  placeholder="请输入广告名称"></el-input>
                     </el-form-item>
-                    <el-form-item label="跳转链接 :" prop="linkUrl">
+                    <el-form-item label="跳转链接 :">
                     <el-input v-model.trim="ruleForm.linkUrl"   auto-complete="new-password"  placeholder="请输入跳转链接"></el-input>
                     </el-form-item>
                     <el-form-item label="广告类型 :" prop="type">
-                    	        <el-input v-model.trim="ruleForm.type"   auto-complete="new-password" 	 placeholder="请输入广告类型"></el-input>
+                    	        <el-select style="width: 100%" v-model="ruleForm.type" multiply placeholder="请选择广告类型">
+                                    <el-option v-for="(item,index) in adTypeList" :key="index" :label="item.name" :value="item.id"></el-option>
+                             </el-select>
                     </el-form-item>
                     <el-form-item label="是否上架 :" prop="status">
                     	  <el-radio v-model="ruleForm.status" :label="1">是</el-radio>
@@ -161,15 +162,15 @@
       return {
         tableForm:{
           time:"",
-          imageUrl:"",
-          title:"",
-          type:"",
-          status:1	,
-          bannerName:""
         },
         dialogVisible:false,
         ruleForm:{
-        	status:1
+        	status:1,
+        	imageUrl:"",
+            title:"",
+            type:"",
+            bannerName:"",
+            linkUrl:""
         },
         currentPage:1,
         pageSize:10,
@@ -196,7 +197,9 @@
         },
         total:0,
 //      client:null,
-        actionType:true
+        actionType:true,
+        imgSrc:"",
+        adTypeList:[]
       }
     },
     mounted() {
@@ -209,7 +212,8 @@
 ////        endpoint:'http://oss-cn-shanghai'
 //    })
 //		console.log(OSS.Wrapper)
-        this.getAdList()
+        this.getAdList();
+        this.getAdTypeList();
     },
     components:{
     	baseUpload
@@ -236,6 +240,16 @@
 //			let res=await client.put('banner', ev.target.files[0]);
 //			console.log(res)
 //  	},
+		handleClose(){
+			this.ruleForm={
+        	status:1,
+        	imageUrl:"",
+            title:"",
+            type:"",
+            bannerName:"",
+            linkUrl:""
+           }
+		},
     	showAdd(actionType,row){
     		this.actionType=actionType;
     		if(!actionType){
@@ -245,18 +259,21 @@
     	},
     	fnUploadRequest(option){
     		console.log(option)
-    		    this.client.put('banner'+option.filename,option.file).then((val) => {
-		         	console.log(val)
-		        }, err => {
-		        	console.log(err)
-		        })
+    		var reader = new FileReader();
+    	    reader.readAsDataURL(option.file);
+    	    const that=this;
+    	    reader.onload = function (e) {
+    	    	console.log(e.target.result)
+    	    	that.$api.product.uploadImg({
+    	    		"base64":e.target.result.split("base64,")[1]
+    	    	}).then((res)=>{
+    	    		that.ruleForm.imageUrl=res.data	
+    	    	})
+    	    }
     	},
       changeInp(val){
         console.log(val)
         // value=value.replace(/[\W]/g,'')
-      },
-      handleClose(){
-        this.ruleForm={};
       },
       reset(){
         this.loginName="";
@@ -296,6 +313,9 @@
       addAd(formName){
         this.$refs[formName].validate((valid) => {
           if (valid) {
+          	if(!this.ruleForm.imageUrl){
+          		return this.$message.warning('请选择广告位图片')
+          	}
           	let url=this.actionType?'addAd':'editAd';
             this.$api.channel[url](this.ruleForm).then(()=>{
               this.$message.success("广告位添加成功!");
@@ -307,6 +327,14 @@
             return false;
           }
         });
+      },
+      getAdTypeList(){
+      	 this.$api.channel.getAdTypeList({
+      	 	pageNum:1,
+      	 	pageSize:1000
+      	 }).then((res)=>{
+          this.adTypeList=res.data.list
+        })
       }
 
     },

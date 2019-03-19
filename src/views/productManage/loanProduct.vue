@@ -79,15 +79,15 @@
                     <div class="topTableForm">
                     	<div class="topTableForm-item" style="width:380px!important">
                             <span>产品类别 : </span>
-                             <el-select  v-model="tableForm.status"   class="aplus-sel"    placeholder="请选择产品类别" style="width: 100%">
+                             <el-select  v-model="tableForm.productCategoryId"   class="aplus-sel"    placeholder="请选择产品类别" style="width: 100%">
                                 <el-option label="全部" value=""></el-option>
-                      			<el-option v-for="(item,index) in typeList" :key="index"  :label="item.name"   :value="item.id"></el-option>
-                      			
+                      			<el-option v-for="(item,index) in typeList" :key="index"  :label="item.categoryName"   :value="item.id"></el-option>
+       			
                             </el-select>
                         </div>
                         <div class="topTableForm-item">
                         	<span>产品名称 :</span>
-                            <el-input placeholder="请输入产品名称"  v-model.trim="tableForm.parameter" class="aplus-norInp"></el-input>
+                            <el-input placeholder="请输入产品名称"  v-model.trim="tableForm.productName" class="aplus-norInp"></el-input>
                         </div>
                         <div class="topTableForm-item-actions">
                             <el-button type="primary" icon="el-icon-search" class="reloadBtn marL10" @click="readyAjax">查询</el-button>
@@ -149,7 +149,7 @@
                         <el-table-column
                                 prop="productCategoryId"
                                 label="产品类别"
-                                show-overflow-tooltip >
+                                show-overflow-tooltip  :formatter="formats">
                         </el-table-column>
                         <el-table-column
                                 prop="productInfo"
@@ -157,11 +157,20 @@
                                 show-overflow-tooltip >
                         </el-table-column>
                         <el-table-column
+                                prop="productInfo"
+                                label="状态"
+                                show-overflow-tooltip >
+                           <template slot-scope="scope">
+                         	{{scope.row.status==1?'上架':'下架'}}
+                           </template>
+                        </el-table-column>
+                        <el-table-column
                                 fixed="right"
                                 label="操作" width="230">
                             <template slot-scope="scope">
-                                <el-button size="mini" plain class="aplus-pribtn" @click="delChannel(scope.row)" >编辑</el-button>
-                                <el-button size="mini" plain class="aplus-errorBtn" @click="downProduct(scope.row)" >下架</el-button>
+                                <el-button size="mini" plain class="aplus-pribtn" @click="showAdd(false,scope.row)" >编辑</el-button>
+                                <el-button size="mini" plain class="aplus-errorBtn" @click="downProduct(scope.row)" v-if="scope.row.status==1" >下架</el-button>
+                                <el-button size="mini" plain class="aplus-recoverBtn" @click="upProduct(scope.row)" v-else >上架</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -184,7 +193,7 @@
 			  :title="actionType?'新增':'编辑'"
 			  :visible.sync="dialogVisible"
 			  width="950px"
-			  :before-close="handleClose">
+			  @close="handleClose">
 			  <div>
 			  	 <h3>产品信息</h3>
 			  	 <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
@@ -197,83 +206,88 @@
 						  :with-credentials="true"
 						  :on-success="handleAvatarSuccess"
 						  :before-upload="beforeAvatarUpload">
-						  <img v-if="imageUrl" :src="imageUrl" class="avatar">
+						  <img v-if="ruleForm.product.logo" :src="ruleForm.product.logo" class="avatar">
 						  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
 						</el-upload>
                     </el-form-item>
                     <div class="formItemLine">
-                    	<el-form-item label="产品名称 :" >
+                    	<el-form-item label="产品名称 :" prop="product.productName">
 	                        <el-input v-model.trim="ruleForm.product.productName"   auto-complete="new-password"  placeholder="请输入产品名称"></el-input>
 	                    </el-form-item>
-	                    <el-form-item label="申请人数 :">
-	                        <el-input v-model.trim="ruleForm.product.applyNum"   auto-complete="new-password"  placeholder="请输入申请人数"></el-input>
+	                    <el-form-item label="申请人数 :" prop="product.applyNum">
+	                        <el-input v-model.trim="ruleForm.product.applyNum" onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number" min="0"  auto-complete="new-password"  placeholder="请输入申请人数"></el-input>
 	                    </el-form-item>
-	                    <el-form-item label="权重 :" >
-	                    	<el-input v-model.trim="ruleForm.product.weight"   auto-complete="new-password" 	 placeholder="请输入权重"></el-input>
+	                    <el-form-item label="权重 :"  prop="product.weight">
+	                    	<el-input v-model.trim="ruleForm.product.weight"  onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number"  min="0"  auto-complete="new-password" 	 placeholder="请输入权重"></el-input>
 	                    </el-form-item>
                     </div>
                     <div class="formItemLine">
-                    	<el-form-item label="还款方式 :" prop="paymentType">
+                    	<el-form-item label="还款方式 :" prop="product.paymentType">
 	                        <el-input v-model.trim="ruleForm.product.paymentType"   auto-complete="new-password"  placeholder="请输入还款方式"></el-input>
 	                    </el-form-item>
-	                    <el-form-item label="产品链接 :" prop="productLink">
+	                    <el-form-item label="产品链接 :" prop="product.productLink">
 	                        <el-input v-model.trim="ruleForm.product.productLink"   auto-complete="new-password"  placeholder="请输入产品链接"></el-input>
 	                    </el-form-item>
-	                    <el-form-item label="申请条件 :" prop="applyRequire">
+	                    <el-form-item label="申请条件 :" prop="product.applyRequire">
 	                    	<el-input v-model.trim="ruleForm.product.applyRequire"   auto-complete="new-password" 	 placeholder="请输入申请条件"></el-input>
 	                    </el-form-item>
                     </div>
                     
                     <div class="formItemLine">
-                    	<el-form-item label="所需资料 :" prop="requireInfo">
+                    	<el-form-item label="所需资料 :" prop="product.requireInfo">
 	                        <el-input v-model.trim="ruleForm.product.requireInfo"   auto-complete="new-password"  placeholder="请输入所需资料"></el-input>
 	                    </el-form-item>
-	                    <el-form-item label="产品类别 :" prop="productCategoryId">
-	                        <el-input v-model.trim="ruleForm.product.productCategoryId"   auto-complete="new-password"  placeholder="请输入产品类别"></el-input>
+	                    <el-form-item label="产品类别 :" prop="product.productCategoryId">
+ 							<el-select style="width: 100%" v-model="ruleForm.product.productCategoryId" multiply placeholder="请选择产品类别">
+                                    <el-option v-for="(item,index) in typeList" :key="index" :label="item.categoryName" :value="item.id"></el-option>
+                             </el-select>	                    
 	                    </el-form-item>
-	                    <el-form-item label="所属板块 :" prop="plateId">
+	                    <el-form-item label="所属板块 :" prop="product.plateId">
 	                    	 <el-select style="width: 100%" v-model="ruleForm.product.plateId" multiply placeholder="请选择所属板块">
                                     <el-option v-for="(item,index) in plateList" :key="index" :label="item.plateName" :value="item.id"></el-option>
                              </el-select>
 	                    </el-form-item>
                     </div>
-                    <el-form-item label="产品简介 :" prop="productInfo">
+                    <el-form-item label="产品简介 :" prop="product.productInfo">
 	                    <el-input v-model.trim="ruleForm.product.productInfo"   auto-complete="new-password" type="textarea" 	 placeholder="请输入产品简介"></el-input>
 	                </el-form-item>
-	                <el-form-item label="产品描述 :" prop="productDescribe">
+	                <el-form-item label="产品描述 :" prop="product.productDescribe">
 	                    <el-input v-model.trim="ruleForm.product.productDescribe"   auto-complete="new-password" type="textarea"  	 placeholder="请输入产品描述"></el-input>
 	                </el-form-item>
                      <h3 class="marT30">借款信息</h3>
                       <div class="formItemLine">
-                    	<el-form-item label="利率类型 :" prop="interestType">
-	                        <el-input v-model.trim="ruleForm.borrowInfo.interestType"   auto-complete="new-password"  placeholder="请输入所需资料"></el-input>
+                    	<el-form-item label="利率类型 :" prop="borrowInfo.interestType">
+	                        <!--<el-input v-model.trim="ruleForm.borrowInfo.interestType"   auto-complete="new-password"  placeholder="请输入所需资料"></el-input>-->
+	                        <el-select style="width: 100%" v-model="ruleForm.borrowInfo.interestType" multiply placeholder="请选择利率类型">
+                                    <el-option v-for="(item,index) in interestTypeList" :key="index" :label="item" :value="item"></el-option>
+                            </el-select>
 	                    </el-form-item>
-	                    <el-form-item label="利率值 :" prop="interestValue">
-	                        <el-input v-model.trim="ruleForm.borrowInfo.interestValue"   auto-complete="new-password"  placeholder="请输入百分比"></el-input>
+	                    <el-form-item label="利率值 :" prop="borrowInfo.interestValue">
+	                        <el-input v-model.trim="ruleForm.borrowInfo.interestValue"  onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number"  min="0"  auto-complete="new-password"  placeholder="请输入百分比"></el-input>
 	                    </el-form-item>
 	                    <el-form-item label="放款速率">
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.lendingRateMin"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.lendingRateMin"  type="number"  min="0"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
 	                    	~
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.lendingRateMax"   auto-complete="new-password"  style="width: 92px;"	></el-input>
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.lendingRateMax" type="number"  min="0"   auto-complete="new-password"  style="width: 92px;"	></el-input>
 	                    </el-form-item>
                     </div>
                     <div class="formItemLine">
-	                    <el-form-item label="贷款额度">
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanPeriodMin"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
+	                    <el-form-item label="贷款额度(元)">
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanPeriodMin"  onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number"  min="0"  auto-complete="new-password"  style="width: 92px;"	 ></el-input>
 	                    	~
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanPeriodMax"   auto-complete="new-password"  style="width: 92px;"	></el-input>
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanPeriodMax"   onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number"  min="0" auto-complete="new-password"  style="width: 92px;"	></el-input>
 	                    </el-form-item>
-	                    <el-form-item label="贷款期限">
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanQuotaMin"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
+	                    <el-form-item label="贷款期限(天)">
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanQuotaMin"  onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number"  min="0"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
 	                    	~
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanQuotaMax"   auto-complete="new-password"  style="width: 92px;"	></el-input>
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanQuotaMax"   onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number"  min="0" auto-complete="new-password"  style="width: 92px;"	></el-input>
 	                    </el-form-item>
                     </div>
                 </el-form>
 			  </div>
 			  <span slot="footer" class="dialog-footer">
 			    <el-button @click="dialogVisible = false">取 消</el-button>
-			    <el-button type="primary" @click="sureAdd">确 定</el-button>
+			    <el-button type="primary" @click="sureAdd('ruleForm')">确 定</el-button>
 			  </span>
 			</el-dialog>
 
@@ -293,15 +307,8 @@
       	dialogVisible:false,
       	actionType:true,
         tableForm:{
-          time:"",
-          time1:"",
-          loan_staus:"",
-          limit_pay_time_start:"",
-          limit_pay_time_end:"",
-          give_time_start:"",
-          give_time_end:"",
-          parameter:"",
-          is_old:""
+        	productCategoryId:'',
+        	productName:""
         },
         type:"1",
         typeList:[],
@@ -343,7 +350,6 @@
 			    "logo": "",
 			    "paymentType": "",
 			    "plateId": "",
-			    "plateName": "",
 			    "productCategoryId": "",
 			    "productDescribe": "",
 			    "productInfo": "",
@@ -353,10 +359,9 @@
 			    "status": "",
 			    "type": "",
 			    "weight": "",
-			    "productId":0
         	},
         	borrowInfo:{
-				    "interestType": "string",
+				    "interestType": "",
 				    "interestValue": "",
 				    "lendingRateMax": "",
 				    "lendingRateMin": "",
@@ -364,26 +369,67 @@
 				    "loanPeriodMin": "",
 				    "loanQuotaMax": "",
 				    "loanQuotaMin": "",
-				    "productId": 0
         	}
         },
         rules: {
-          productName: [{
+          "product.productName": [{
             required: true,
             message:"请输入产品名称",
             trigger: 'blur'
           }],
-          applyNum: [{
+          "product.applyNum": [{
             required: true,
             message:"请输入申请人数",
             trigger: 'blur'
           }],
-          weight: [{
+          "product.weight": [{
             required: true,
             message:"请输入权重",
             trigger: 'blur'
-          }],   
+          }],  
+          "product.paymentType": [{
+            required: true,
+            message:"请输入还款方式",
+            trigger: 'blur'
+          }],  
+          "product.productLink": [{
+            required: true,
+            message:"请输入产品链接",
+            trigger: 'blur'
+          }],  
+          "product.applyRequire": [{
+            required: true,
+            message:"请输入申请条件",
+            trigger: 'blur'
+          }],
+          "product.requireInfo": [{
+            required: true,
+            message:"请输入所需条件",
+            trigger: 'blur'
+          }],
+          "product.productCategoryId": [{
+            required: true,
+            message:"请选择产品类型",
+            trigger: 'blur'
+          }],
+          "product.plateId": [{
+            required: true,
+            message:"请选择所属板块",
+            trigger: 'blur'
+          }],
+          
+          "borrowInfo.interestType": [{
+            required: true,
+            message:"请选择利率类型",
+            trigger: 'blur'
+          }],
+          "borrowInfo.interestValue": [{
+            required: true,
+            message:"请输入利率值",
+            trigger: 'blur'
+          }],
         },
+       	interestTypeList:['日利率','月利率','年利率']
       };
     },
     mounted() {
@@ -410,28 +456,109 @@
       }
     },
     methods:{
-      sureAdd(){
-      	if(this.actionType){
-      		this.$api.product.addLoanProduct({
-      			productAddPO:this.ruleForm
-      		}).then((res)=>{
-      			
-      		})
-      	}
+    	handleClose(){
+    		this.ruleForm={
+	        	product:{
+	        		"applyNum": "",
+				    "applyRequire": "",
+				    "categoryName": "",
+				    "logo": "",
+				    "paymentType": "",
+				    "plateId": "",
+				    "productCategoryId": "",
+				    "productDescribe": "",
+				    "productInfo": "",
+				    "productLink": "",
+				    "productName": "",
+				    "requireInfo": "",
+				    "status": "",
+				    "type": "",
+				    "weight": "",
+	        	},
+	        	borrowInfo:{
+					    "interestType": "",
+					    "interestValue": "",
+					    "lendingRateMax": "",
+					    "lendingRateMin": "",
+					    "loanPeriodMax": "",
+					    "loanPeriodMin": "",
+					    "loanQuotaMax": "",
+					    "loanQuotaMin": "",
+	        	}
+	        }
+    	},
+    	formats(row){
+    		for(let i of this.typeList){
+    			if(row.productCategoryId==i.id){
+    				return i.categoryName
+    			}
+    		}
+    	},
+    	fnUploadRequest(option){
+			var reader = new FileReader();
+		    reader.readAsDataURL(option.file);
+		    const that=this;
+		    reader.onload = function (e) {
+		    	that.$api.product.uploadImg({
+		    		"base64":e.target.result.split("base64,")[1]
+		    	}).then((res)=>{
+		    		that.ruleForm.product.logo=res.data	
+		    	})
+		    }
+		},
+      sureAdd(formName){
+      	 this.$refs[formName].validate((valid) => {
+          if (valid) {
+          	   	if(!this.ruleForm.product.logo){
+          	   		return this.$message.warning("请先选择logo")
+          	   	}
+          	   	if(!this.ruleForm.borrowInfo.lendingRateMin||!this.ruleForm.borrowInfo.lendingRateMax||!this.ruleForm.borrowInfo.loanPeriodMin||!this.ruleForm.borrowInfo.loanPeriodMax||!this.ruleForm.borrowInfo.loanQuotaMin||!this.ruleForm.borrowInfo.loanQuotaMax){
+          	   		return this.$message.warning("请输入完整的借款信息")
+          	   	}
+          	  	if(this.actionType){
+		      		this.$api.product.addLoanProduct(this.ruleForm).then((res)=>{
+		      			this.$message.success("新增成功");
+		      			this.readyAjax();
+		      			this.dialogVisible=false;
+		      		})
+		      	}else{
+		      		this.$api.product.editLoanProduct(this.ruleForm).then((res)=>{
+		      			this.$message.success("编辑成功");
+		      			this.readyAjax();
+		      			this.dialogVisible=false;
+		      		})
+		      	}
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
       },
       showAdd(actionType,row){
       	this.actionType=actionType;
       	if(!actionType){
-//    		this
+      		this.$api.product.getLoanProductDetail({
+      			productId:row.id
+      		}).then((res)=>{
+      			this.ruleForm={...res.data}
+      		}).catch((e)=>{
+      			this.$message.error(e.msg)
+      		})
       	}
       	this.dialogVisible=true
       },
       downProduct(row){
       	this.$toolkit.showConfrim('确定要下架此产品吗？','提示').then(()=>{
-          this.$api.product.LoanUndercarriage({
-          	productId:row.id
-          }).then(()=>{
+          this.$api.product.LoanUndercarriage(row.id).then(()=>{
             this.$message.success("产品下架成功!");
+            this.readyAjax()
+          })
+        })
+      },
+      upProduct(row){
+      	this.$toolkit.showConfrim('确定要上架此产品吗？','提示').then(()=>{
+          this.$api.product.LoanUpcarriage(row.id).then(()=>{
+            this.$message.success("产品上架成功!");
             this.readyAjax()
           })
         })
