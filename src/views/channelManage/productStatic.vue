@@ -104,19 +104,19 @@
                                             prop="register"
                                             :show-overflow-tooltip="true"
                                             label="产品注册数">
-                                           <template slot-scope="scope">
+                                           <!--<template slot-scope="scope">
                                            	    <el-input v-if="scope.row.registerClick" v-model="scope.row.register"></el-input>
                                            		<span  v-else>{{scope.row.register}}</span>
-                                           </template>
+                                           </template>-->
                                     </el-table-column>
                                     <el-table-column
                                             :show-overflow-tooltip="true"
                                             prop="loan"
                                             label="产品下款数">
-                                            <template slot-scope="scope">
+                                            <!--<template slot-scope="scope">
                                            	    <el-input v-if="scope.row.loanClick" v-model="scope.row.loan"></el-input>
                                            		<span  v-else>{{scope.row.loan}}</span>
-                                           </template>
+                                           </template>-->
                                     </el-table-column>
                                     <!--<el-table-column-->
                                             <!--:show-overflow-tooltip="true"-->
@@ -131,6 +131,19 @@
                                      	{{scope.row.register?((scope.row.loan/scope.row.register)*100).toFixed(2)+'%':'0.00%'}}
                                      </template>
                                     </el-table-column>
+                                    <el-table-column
+									      fixed="right"
+									      label="操作"
+									      width="120">
+									      <template slot-scope="scope">
+									        <el-button
+									          @click="showProductDialog(scope.row)"
+									          
+									          size="small">
+									          	设置产品数据
+									        </el-button>
+									      </template>
+									    </el-table-column>
                                     <!--<el-table-column-->
                                             <!--:show-overflow-tooltip="true"-->
                                             <!--prop="memberCount"-->
@@ -213,12 +226,33 @@
                     </div>
                 </div>
             </div>
-
-
-
-
-
         </el-card>
+        
+        
+        
+        <el-dialog
+		  title="设置产品数据"
+		  :visible.sync="dialogVisible"
+		  width="700px"
+		  @close="handleClose">
+		  <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+			  <el-form-item label="产品注册数">
+			    <el-input  v-model="ruleForm.register" autocomplete="off"></el-input>
+			  </el-form-item>
+			  <el-form-item label="产品下款数">
+			    <el-input v-model.number="ruleForm.loan"></el-input>
+			  </el-form-item>
+			  <el-form-item>
+			    <!--<el-button type="primary" @click="submitForm('ruleForm2')">提交</el-button>-->
+			    <!--<el-button @click="resetForm('ruleForm2')">重置</el-button>-->
+			  </el-form-item>
+		</el-form>
+		  <span slot="footer" class="dialog-footer">
+		    <el-button @click="dialogVisible = false">关 闭</el-button>
+		    <el-button type="primary" @click="setProductData">确 定</el-button>
+		  </span>
+		</el-dialog>
+
 
     </div>
 </template>
@@ -254,7 +288,9 @@
         topData:{},
         loanClick:false,
         registerClick:false,
-        nowPro:""
+        nowPro:"",
+        dialogVisible:false,
+        ruleForm:{}
       };
     },
     mounted() {
@@ -272,6 +308,10 @@
       }
     },
     methods: {
+      showProductDialog(row){
+      	this.dialogVisible=true;
+      	this.ruleForm={...row}
+      },
       reset(){
         for(let i in this.tableForm){
           this.tableForm[i]=""
@@ -290,12 +330,14 @@
       		this.$set(this.tableData,this.tableData[index],row)
       	}	
       },
-      setLoanAndRegister(row){
+      setProductData(){
       	this.$api.channel.setLoanAndRegister({
-      		productId:row.productId,
-      		loan:row.loan,
-      		register:row.register
+      		productId:this.ruleForm.productId,
+      		loan:this.ruleForm.loan,
+      		register:this.ruleForm.register
       	}).then((res)=>{
+      		this.dialogVisible=false;
+      		this.$message.success("产品数据设置成功")
       		this.readyAjax();
       	}).catch((e)=>{
       		this.$message.error(e.msg)
