@@ -171,6 +171,7 @@
                                 <el-button size="mini" plain class="aplus-pribtn" @click="showAdd(false,scope.row)" >编辑</el-button>
                                 <el-button size="mini" plain class="aplus-errorBtn" @click="downProduct(scope.row)" v-if="scope.row.status==1" >下架</el-button>
                                 <el-button size="mini" plain class="aplus-recoverBtn" @click="upProduct(scope.row)" v-else >上架</el-button>
+                                <el-button size="mini" plain class="aplus-errorBtn" @click="delLoan(scope.row)" >删除</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -192,11 +193,11 @@
 			<el-dialog
 			  :title="actionType?'新增':'编辑'"
 			  :visible.sync="dialogVisible"
-			  width="950px"
+			  width="1180px"
 			  @close="handleClose">
 			  <div>
 			  	 <h3>产品信息</h3>
-			  	 <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+			  	 <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="95px" class="demo-ruleForm">
                 	<el-form-item label="产品图片 :">
                        <el-upload
 						  class="avatar-uploader"
@@ -242,8 +243,8 @@
                                     <el-option v-for="(item,index) in typeList" :key="index" :label="item.categoryName" :value="item.id"></el-option>
                              </el-select>	                    
 	                    </el-form-item>
-	                    <el-form-item label="所属板块 :" prop="product.plateId">
-	                    	 <el-select style="width: 100%" v-model="ruleForm.product.plateId" multiply placeholder="请选择所属板块">
+	                    <el-form-item label="所属板块 :">
+	                    	 <el-select style="width: 100%" v-model="ruleForm.product.plateId" multiple placeholder="请选择所属板块">
                                     <el-option v-for="(item,index) in plateList" :key="index" :label="item.plateName" :value="item.id"></el-option>
                              </el-select>
 	                    </el-form-item>
@@ -263,24 +264,37 @@
                             </el-select>
 	                    </el-form-item>
 	                    <el-form-item label="利率值 :" prop="borrowInfo.interestValue">
-	                        <el-input v-model.trim="ruleForm.borrowInfo.interestValue"  onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number"  min="0"  auto-complete="new-password"  placeholder="请输入百分比"></el-input>
+	                        <el-input v-model.trim="ruleForm.borrowInfo.interestValue"  type="number"  min="0"  auto-complete="new-password"  placeholder="请输入百分比"></el-input>
 	                    </el-form-item>
-	                    <el-form-item label="放款速率">
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.lendingRateMin"  type="number"  min="0"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
+	                    <el-form-item label="放款速率"  prop="borrowInfo.quatoUnit">
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanQuotaMin"  type="number"  min="0"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
 	                    	~
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.lendingRateMax" type="number"  min="0"   auto-complete="new-password"  style="width: 92px;"	></el-input>
-	                    </el-form-item>
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanQuotaMax" type="number"  min="0"   auto-complete="new-password"  style="width: 92px;"	></el-input>
+		                    <el-select  placeholder="请选择放款速率单位" v-model="ruleForm.borrowInfo.quatoUnit" style="width:80px">
+							    <el-option label='分钟' :value="1"></el-option>
+							    <el-option label='小时' :value="60"></el-option>
+							 </el-select>
+		                  </el-form-item>
                     </div>
                     <div class="formItemLine">
-	                    <el-form-item label="贷款额度(元)">
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanPeriodMin"  onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number"  min="0"  auto-complete="new-password"  style="width: 92px;"	 ></el-input>
+	                    <el-form-item label="贷款额度"   prop="borrowInfo.limitUnit">
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.limitMoneyMin"  type="number"  min="0"  auto-complete="new-password"  style="width: 92px;"	 ></el-input>
 	                    	~
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanPeriodMax"   onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number"  min="0" auto-complete="new-password"  style="width: 92px;"	></el-input>
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.limitMoneyMax"    type="number"  min="0" auto-complete="new-password"  style="width: 92px;"	></el-input>
+	                    	 <el-select  placeholder="请选择贷款额度单位"  v-model="ruleForm.borrowInfo.limitUnit"   style="width:80px">
+							    <el-option label='元' :value="1"></el-option>
+							    <el-option label='万元' :value="10000"></el-option>
+							 </el-select>
 	                    </el-form-item>
-	                    <el-form-item label="贷款期限(天)">
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanQuotaMin"  onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number"  min="0"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
+	                    <el-form-item label="贷款期限"   prop="borrowInfo.periodUnit">
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanPeriodMin"   type="number"  min="0"   auto-complete="new-password"  style="width: 92px;"	 ></el-input>
 	                    	~
-	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanQuotaMax"   onkeypress="return event.keyCode>=48&&event.keyCode<=57" type="number"  min="0" auto-complete="new-password"  style="width: 92px;"	></el-input>
+	                    	<el-input v-model.trim="ruleForm.borrowInfo.loanPeriodMax"   type="number"  min="0" auto-complete="new-password"  style="width: 92px;"	></el-input>
+	                    	 <el-select v-model="ruleForm.borrowInfo.periodUnit" placeholder="请选择贷款期限单位"  style="width:80px">
+							    <el-option label='日' :value="1"></el-option>
+							    <el-option label='月' :value="30"></el-option>
+							    <el-option label='年' :value="360"></el-option>
+							 </el-select>
 	                    </el-form-item>
                     </div>
                 </el-form>
@@ -349,7 +363,7 @@
 			    "categoryName": "",
 			    "logo": "",
 			    "paymentType": "",
-			    "plateId": "",
+			    "plateId": [],
 			    "productCategoryId": "",
 			    "productDescribe": "",
 			    "productInfo": "",
@@ -369,6 +383,9 @@
 				    "loanPeriodMin": "",
 				    "loanQuotaMax": "",
 				    "loanQuotaMin": "",
+				    "periodUnit":"",
+				    "limitUnit":"",
+				    "quatoUnit":""
         	}
         },
         rules: {
@@ -428,6 +445,21 @@
             message:"请输入利率值",
             trigger: 'blur'
           }],
+          "borrowInfo.quatoUnit": [{
+            required: true,
+            message:"请选择放款速率单位",
+            trigger: 'blur'
+          }],
+          "borrowInfo.periodUnit": [{
+            required: true,
+            message:"请选择贷款额度单位",
+            trigger: 'blur'
+          }],
+          "borrowInfo.limitUnit": [{
+            required: true,
+            message:"请选择贷款期限单位",
+            trigger: 'blur'
+          }],
         },
        	interestTypeList:['日利率','月利率','年利率']
       };
@@ -464,7 +496,7 @@
 				    "categoryName": "",
 				    "logo": "",
 				    "paymentType": "",
-				    "plateId": "",
+				    "plateId": [],
 				    "productCategoryId": "",
 				    "productDescribe": "",
 				    "productInfo": "",
@@ -484,6 +516,8 @@
 					    "loanPeriodMin": "",
 					    "loanQuotaMax": "",
 					    "loanQuotaMin": "",
+					    "limitMoneyMin":"",
+					    "limitMoneyMax":""
 	        	}
 	        }
     	},
@@ -512,9 +546,19 @@
           	   	if(!this.ruleForm.product.logo){
           	   		return this.$message.warning("请先选择logo")
           	   	}
-          	   	if(!this.ruleForm.borrowInfo.lendingRateMin||!this.ruleForm.borrowInfo.lendingRateMax||!this.ruleForm.borrowInfo.loanPeriodMin||!this.ruleForm.borrowInfo.loanPeriodMax||!this.ruleForm.borrowInfo.loanQuotaMin||!this.ruleForm.borrowInfo.loanQuotaMax){
+          	   	if(!this.ruleForm.borrowInfo.limitMoneyMax||!this.ruleForm.borrowInfo.limitMoneyMin|!this.ruleForm.borrowInfo.loanPeriodMin||!this.ruleForm.borrowInfo.loanPeriodMax||!this.ruleForm.borrowInfo.loanQuotaMin||!this.ruleForm.borrowInfo.loanQuotaMax){
           	   		return this.$message.warning("请输入完整的借款信息")
           	   	}
+          	   	let arr=[];
+	          	for(let i of this.plateList){
+	          		for(let  k of this.ruleForm.product.plateId){
+	          			if(i.id===k){
+	          				arr.push(`${i.plateName}`)
+	          			}
+	          		}
+	          	}
+	          	this.ruleForm.product.plateName=arr.join(",");
+	          	this.ruleForm.product.plateId=this.ruleForm.product.plateId[0];
           	  	if(this.actionType){
 		      		this.$api.product.addLoanProduct(this.ruleForm).then((res)=>{
 		      			this.$message.success("新增成功");
@@ -540,8 +584,19 @@
       		this.$api.product.getLoanProductDetail({
       			productId:row.id
       		}).then((res)=>{
-      			this.ruleForm={...res.data}
+      			this.ruleForm={...res.data};
+      			let arr=this.ruleForm.product.plateName?this.ruleForm.product.plateName.split(","):[];
+	      		this.ruleForm.product.plateId=[]
+	      		for(let i of this.plateList){
+	      			for(let j of arr){
+	      				if(j==i.plateName){
+	      					
+	      					this.ruleForm.product.plateId.push(i.id)
+	      				}
+	      			}
+	      		}	      		
       		}).catch((e)=>{
+      			console.log(e)
       			this.$message.error(e.msg)
       		})
       	}
@@ -559,6 +614,14 @@
       	this.$toolkit.showConfrim('确定要上架此产品吗？','提示').then(()=>{
           this.$api.product.LoanUpcarriage(row.id).then(()=>{
             this.$message.success("产品上架成功!");
+            this.readyAjax()
+          })
+        })
+      },
+      delLoan(row){
+      	this.$toolkit.showConfrim('确定要删除此贷款类产品吗？','提示').then(()=>{
+          this.$api.product.delLaonProduct(row.id).then(()=>{
+            this.$message.success("产品删除成功!");
             this.readyAjax()
           })
         })

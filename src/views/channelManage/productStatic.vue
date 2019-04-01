@@ -310,7 +310,9 @@
     methods: {
       showProductDialog(row){
       	this.dialogVisible=true;
-      	this.ruleForm={...row}
+      	this.ruleForm={...row};
+      	this.ruleForm.loan=this.ruleForm.loan=="null"?'':this.ruleForm.loan;
+      	this.ruleForm.register=this.ruleForm.register=="null"?'':this.ruleForm.register;
       },
       reset(){
         for(let i in this.tableForm){
@@ -334,7 +336,8 @@
       	this.$api.channel.setLoanAndRegister({
       		productId:this.ruleForm.productId,
       		loan:this.ruleForm.loan,
-      		register:this.ruleForm.register
+      		dateTime:this.ruleForm.dateTime,
+      		register:this.ruleForm.register,
       	}).then((res)=>{
       		this.dialogVisible=false;
       		this.$message.success("产品数据设置成功")

@@ -8,6 +8,8 @@ export default {
    LoanUndercarriage: params => $.put("/product/undercarriage/"+params, {}, { lock: true }),
    
    LoanUpcarriage: params => $.put("/product/upcarriage/"+params, {}, { lock: true }),
+   
+   delLaonProduct: params => $.delete("/product?productId="+params,{}, { lock: true }),
      
    getPlateList: params => $.put("/product/plate/list", params, { lock: true }),
    
@@ -32,6 +34,8 @@ export default {
    
    
    uploadImg: params => $.post("/image/upload", params, { lock: true }),
+   
+   
    
 
   // 订单管理-当日应还款订单

@@ -20,7 +20,7 @@ export default {
   editChannel: params => $.put("channel", params, { lock: true }),
   
 
-  delChannel: params => $.delete("channel/"+params, {}, { lock: true  }),
+  delChannel: params => $.put("channel", params, { lock: true  }),
 
 
   //渠道转化率-注册纬度

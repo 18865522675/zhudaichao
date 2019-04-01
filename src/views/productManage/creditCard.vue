@@ -176,6 +176,8 @@
 		                                label="操作" width="230">
 		                            <template slot-scope="scope">
 		                                <el-button size="mini" plain class="aplus-pribtn"  @click="showAdd(false,scope.row)" >编辑</el-button>
+		                                <el-button size="mini" plain class="aplus-errorBtn" @click="downCredit(scope.row)" v-if="scope.row.status==1" >下架</el-button>
+                                        <el-button size="mini" plain class="aplus-recoverBtn" @click="upCredit(scope.row)" v-else >上架</el-button>
 		                                <el-button size="mini" plain class="aplus-errorBtn" @click="delCredit(scope.row)" >删除</el-button>
 		                            </template>
 		                        </el-table-column>
@@ -276,13 +278,17 @@
                                     <el-option  label="核批率高" value="核批率高"></el-option>
                                     <el-option  label="高额提取" value="高额提取"></el-option>
                                     <el-option  label="速下卡" value="速下卡"></el-option>
+                                    <el-option  label="免年费" value="免年费"></el-option>
+                                    <el-option  label="颜值动人" value="颜值动人"></el-option>
+                                    <el-option  label="申请有礼" value="申请有礼"></el-option>
+                                    <el-option  label="出行境外" value="出行境外"></el-option>
                              </el-select>
 	                    </el-form-item>
 	                    <el-form-item label="产品链接 :" prop="productLink">
 	                        <el-input v-model.trim="ruleForm.productLink"   auto-complete="new-password"  placeholder="请输入产品链接"></el-input>
 	                    </el-form-item>
-	                    <el-form-item label="所属板块 :" prop="plateId">
-	                    	 <el-select style="width: 100%" v-model="ruleForm.plateId" multiply placeholder="请选择版块">
+	                    <el-form-item label="所属板块 :">
+	                    	 <el-select style="width: 100%" v-model="ruleForm.plateId" multiple placeholder="请选择版块">
                                     <el-option v-for="(item,index) in plateList" :key="index"  :label="item.plateName" :value="item.id"></el-option>
                              </el-select>
 	                    </el-form-item>
@@ -413,7 +419,7 @@
 			  "currency": "",
 			  "logo": "",
 			  "name": "",
-			  "plateId": "",
+			  "plateId": [],
 			  "productInfo": "",
 			  "productLink": "",
 			  "theme": [],
@@ -522,7 +528,7 @@
 			  "currency": "",
 			  "logo": "",
 			  "name": "",
-			  "plateId": "",
+			  "plateId": [],
 			  "productInfo": "",
 			  "productLink": "",
 			  "theme":[],
@@ -580,11 +586,16 @@
           	if(!this.ruleForm.logo){
           		return this.$message.warning("请先上传图片")
           	}
+          	let arr=[];
           	for(let i of this.plateList){
-          		if(this.ruleForm.plateId==i.id){
-          			this.ruleForm.plateName=i.plateName
+          		for(let  k of this.ruleForm.plateId){
+          			if(i.id===k){
+          				arr.push(`${i.plateName}`)
+          			}
           		}
           	}
+          	this.ruleForm.plateName=arr.join(",");
+          	delete this.ruleForm.plateId;
             this.ruleForm.theme=this.ruleForm.theme.join(",")
           	if(this.actionType){
 		      		this.$api.product.addCreditCard({
@@ -618,7 +629,20 @@
       		this.ruleForm={...row};
       		this.ruleForm.annualFee=+this.ruleForm.annualFee;
       		this.ruleForm.currency=+this.ruleForm.currency;
-      		this.ruleForm.theme=this.ruleForm.theme.split(",")
+      		this.ruleForm.theme=this.ruleForm.theme.split(",");
+      		let arr=this.ruleForm.plateName.split(",");
+      		console.log(arr)
+      		this.ruleForm.plateId=[]
+      		for(let i of this.plateList){
+      			for(let j of arr){
+      				if(j==i.plateName){
+      					
+      					this.ruleForm.plateId.push(i.id)
+      				}
+      			}
+      		}
+      		
+      		console.log(this.ruleForm.plateId)
       	}
       	this.dialogVisible=true
       },
@@ -639,6 +663,34 @@
         	this.getBankList()	
         }
         
+      },
+      downCredit(row){
+      	this.$toolkit.showConfrim('确定要下架此信用卡产品吗？','提示').then(()=>{
+          this.$api.product.editCreditCard({
+      			...row,
+      			status:0
+      		}).then((res)=>{
+      			this.$message.success("产品下架成功!");
+      			this.dialogVisible=false;
+      			this.readyAjax()
+      		}).catch((e)=>{
+      			this.$message.error("产品下架失败!");
+      		})
+        })
+      },
+      upCredit(row){
+      	this.$toolkit.showConfrim('确定要上架此信用卡产品吗？','提示').then(()=>{
+          this.$api.product.editCreditCard({
+      			...row,
+      			status:1
+      		}).then((res)=>{
+      			this.$message.success("产品上架成功!");
+      			this.dialogVisible=false;
+      			this.readyAjax()
+      		}).catch((e)=>{
+      			this.$message.error("产品下架失败!");
+      		})
+        })
       },
       reset(){
         for(let i in this.tableForm){

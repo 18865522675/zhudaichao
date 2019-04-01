@@ -455,7 +455,7 @@
       	}
         this.$api.member.getEnderPriseList({
           ...this.tableForm,
-          pageNum:this.currentPage,
+          pageNum:this.pageNum,
           pageSize:this.pageSize
         }).then((res)=>{
           this.dataList=res.data.list;

@@ -56,11 +56,22 @@
                                 show-overflow-tooltip >
                         </el-table-column>
                         <el-table-column
+                                prop="jumpH5Vest"
+                                label="h5跳转马甲"
+                                show-overflow-tooltip :formatter="formats" >
+                                
+                        </el-table-column>
+                        <el-table-column
+                                prop="jumpDownloanVset"
+                                label="下载跳转马甲"
+                                show-overflow-tooltip  :formatter="formats" >
+                        </el-table-column>
+                        <el-table-column
                                 prop="payMoney"
                                 label="操作"
                                 show-overflow-tooltip>
                             <template slot-scope="scope">
-                                <!--<el-button size="mini" plain class="aplus-errorBtn" @click="delChannel(scope.row)">删除</el-button>-->
+                                <el-button size="mini" plain class="aplus-errorBtn" @click="delChannel(scope.row)">删除</el-button>
                                 <el-button size="mini" plain class="aplus-pribtn" @click="showEdit(false,scope.row)">编辑</el-button>
                             </template>
                         </el-table-column>
@@ -189,6 +200,12 @@
         this.name="";
         this.readyAjax()
       },
+      formats(row,col){
+      	switch(row[col.property]){
+      		case 1:return "开启";
+      		case 0:return "关闭";
+      	}
+      },
       readyAjax(){
         this.currentPage=1;
         this.pageSize=10;
@@ -196,7 +213,10 @@
       },
       delChannel(row){
         this.$toolkit.showConfrim('确定要删除此渠道吗？','提示').then(()=>{
-          this.$api.channel.delChannel(row.id).then(()=>{
+          this.$api.channel.delChannel({
+          	...row,
+          	status:-1
+          }).then(()=>{
             this.$message.success("渠道删除成功！");
             this.readyAjax()
           })
